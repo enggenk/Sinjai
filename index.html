@@ -532,10 +532,8 @@ if (savedUser) {
         }
 
         function finalStop(i, markAsPaid) { 
-          // 🔇 HENTIKAN VOICE UNTUK UNIT INI
+// 🔇 HENTIKAN VOICE SAAT STOP DITEKAN (PALING AMAN)
     expiredUnits.delete(unitNames[i]);
-
-    // 🔕 Jika tidak ada unit expired lain, matikan voice loop
     if (expiredUnits.size === 0) {
         stopVoiceLoop();
     }
@@ -738,39 +736,55 @@ function speakExpiredUnits() {
     if (!('speechSynthesis' in window)) return;
     if (expiredUnits.size === 0) return;
 
-    const units = Array.from(expiredUnits);
-
-    // Gabung dengan "dan"
+    // 🔹 Unit expired (dibaca per digit)
+    const units = Array.from(expiredUnits).map(u => readUnitName(u));
     const unitText =
         units.length === 1
             ? units[0]
             : units.slice(0, -1).join(', ') + ' dan ' + units.slice(-1);
 
-    // cek apakah ada yang belum bayar
-    const unpaidUnits = units.filter(name => {
-        const idx = unitNames.indexOf(name);
-        return idx !== -1 && !isPaid[idx];
-    });
+    // 🔹 Unit yang BELUM BAYAR
+    const unpaidUnits = Array.from(expiredUnits)
+        .map(u => ({ raw: u, spoken: readUnitName(u) }))
+        .filter(o => {
+            const idx = unitNames.indexOf(o.raw);
+            return idx !== -1 && !isPaid[idx];
+        })
+        .map(o => o.spoken);
 
-    let message = `tor monitor ketua ${unitText} habismi.`;
+    speechSynthesis.cancel();
 
+    // 🔈 1️⃣ VOICE NORMAL – unit habis
+    const normalMsg = new SpeechSynthesisUtterance(
+        `tor monitor ketua, ${unitText} sudah habis mi.`
+    );
+    normalMsg.lang = 'id-ID';
+    normalMsg.rate = 0.95;
+    normalMsg.pitch = 0.9;
+    normalMsg.volume = 1;
+
+    speechSynthesis.speak(normalMsg);
+
+    // 🔊 2️⃣ VOICE TEGAS – khusus BELUM BAYAR
     if (unpaidUnits.length > 0) {
         const unpaidText =
             unpaidUnits.length === 1
                 ? unpaidUnits[0]
                 : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);
 
-        message += ` nomor ${unpaidText} belumpi  membayar, nahh!.`;
+        const alertMsg = new SpeechSynthesisUtterance(
+            `${unpaidText} itu belumpi dibayar nah.`
+        );
+        alertMsg.lang = 'id-ID';
+        alertMsg.rate = 1.05;   // lebih cepat
+        alertMsg.pitch = 0.7;   // lebih berat
+        alertMsg.volume = 1.3;  // 🔥 LEBIH KERAS
+
+        // kasih jeda dikit setelah voice pertama
+        setTimeout(() => {
+            speechSynthesis.speak(alertMsg);
+        }, 600);
     }
-
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = 'id-ID';
-    utterance.rate = 2;
-    utterance.pitch = 5;
-    utterance.volume = 5;
-
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
 }
 function startVoiceLoop() {
     if (voiceInterval) return;
