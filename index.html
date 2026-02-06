@@ -506,7 +506,6 @@ body {
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
     
-let expiredVoiceTimers = {};
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBgA52SX2Azpc-UrpPg4sPVNukT3GjSyUw",
@@ -524,6 +523,7 @@ let expiredVoiceTimers = {};
         let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
         let isExpired = {};
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
+        let expiredVoiceTimers = {}; 
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
 
         db.ref('app_data').on('value', (snapshot) => {
@@ -660,7 +660,7 @@ if (savedUser) {
     });
 }
 
-        function resumeTimer(i) {
+function resumeTimer(i) {
     if (timers[i]) clearInterval(timers[i]);
     renderRunningCtrl(i);
 
@@ -684,7 +684,6 @@ if (savedUser) {
                 document.getElementById('alarm-warning').play();
                 warningPlayed[i] = true;
             }
-
         } else {
             // ⏰ WAKTU HABIS
             clearInterval(timers[i]);
@@ -700,8 +699,11 @@ if (savedUser) {
 
             document.getElementById('alarm-finished').play();
             launchConfetti(60);
-            speakUnitExpired(i);
-startExpiredVoiceRepeat(i);
+
+            if (!expiredVoiceTimers[i]) {
+                speakUnitExpired(i);
+                startExpiredVoiceRepeat(i);
+            }
         }
     }, 1000);
 }
@@ -745,6 +747,7 @@ startExpiredVoiceRepeat(i);
 
         function executeSwap(targetIdx) {
             const s = swapSourceIdx; const t = targetIdx;
+            stopExpiredVoiceRepeat(s);
             endTimes[t] = endTimes[s]; startTimes[t] = startTimes[s];
             isPaused[t] = isPaused[s]; isPaid[t] = isPaid[s];
             activeUsers[t] = activeUsers[s]; activeDurations[t] = activeDurations[s];
