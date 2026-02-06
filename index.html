@@ -536,15 +536,11 @@ if (savedUser) {
         function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeModal(); }
 
         function startUnit(i, dur, paid, userName) {
-    const nowRef = firebase.database.ServerValue.TIMESTAMP;
+    const now = serverNow();
+    const durationMs = dur * 60 * 1000;
 
-    // simpan start time pakai server
-    db.ref(`app_data/startTimes/${i}`).set(nowRef);
-
-    // endTime = server time + durasi
-    db.ref(`app_data/endTimes/${i}`).set(
-        firebase.database.ServerValue.TIMESTAMP
-    );
+    startTimes[i] = now;
+    endTimes[i] = now + durationMs;
 
     activeDurations[i] = dur;
     isPaid[i] = paid;
