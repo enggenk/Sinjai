@@ -384,31 +384,7 @@ function addNewUnit() {
         saveAppState();
     }
 }
-// ➕ TAMBAH UNIT (AMAN)
 
-    const u = document.getElementById('user-input').value;
-    const p = document.getElementById('pass-input').value;
-    const userFound = users.find(x => x.user === u && x.pass === p);
-
-    if (userFound) {
-        currentUser = userFound;
-
-        // 🔐 SIMPAN SESSION LOGIN
-        localStorage.setItem('currentUser', JSON.stringify(userFound));
-
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        document.getElementById('current-user-display').innerText = "Aktif: " + currentUser.user;
-
-        applyPermissions();
-        initDashboard();
-        renderQueue();
-        renderLogs();
-        renderUserList();
-    } else {
-        document.getElementById('login-err').style.display = 'block';
-    }
-}
 
 // ➕ TAMBAH UNIT
 function addNewUnit() {
@@ -421,30 +397,6 @@ function addNewUnit() {
     if (n) {
         unitNames.push(n);
         saveAppState();
-    }
-}
-    const u = document.getElementById('user-input').value;
-    const p = document.getElementById('pass-input').value;
-    const userFound = users.find(x => x.user === u && x.pass === p);
-
-    if (userFound) {
-        currentUser = userFound;
-
-        // 🔐 SIMPAN SESSION LOGIN
-        localStorage.setItem('currentUser', JSON.stringify(userFound));
-
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        document.getElementById('current-user-display').innerText =
-            "Aktif: " + currentUser.user;
-
-        applyPermissions();
-        initDashboard();
-        renderQueue();
-        renderLogs();
-        renderUserList();
-    } else {
-        document.getElementById('login-err').style.display = 'block';
     }
 }
 
