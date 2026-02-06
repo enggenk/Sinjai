@@ -505,7 +505,7 @@ if (savedUser) {
     const isAdmin = currentUser && currentUser.role === 'admin';
 
     unitNames.forEach((name, i) => {
-        const isActive = (endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]));
+       const isActive = !!endTimes[i]; // ⬅️ SELAMA BELUM STOP, TETAP AKTIF
         const expiredClass = isExpired[i] ? 'expired' : '';
         const activeClass = isActive ? 'active-run' : '';
 
@@ -592,7 +592,9 @@ if (savedUser) {
                     <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, -60000)">-1</button>
                     <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, 60000)">+1</button>
                     <button style="background:var(--warning); color:white" onclick="pause(${i})">${isPaused[i]?'GO':'PAUSE'}</button>
-                    <button style="background:var(--danger); color:white" onclick="triggerStop(${i})">STOP</button>
+                    <button style="background:var(--danger); color:white" onclick="triggerStop(${i})">
+    ${isExpired[i] ? 'SELESAIKAN' : 'STOP'}
+</button>
                 </div>`;
         }
 
