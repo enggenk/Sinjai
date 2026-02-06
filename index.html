@@ -421,12 +421,16 @@ if (savedUser) {
                         warningPlayed[i] = true;
                     }
                 } else {
-                    clearInterval(timers[i]);
-                    const el = document.getElementById(`timer-${i}`);
-                    if(el) el.innerText = "00:00";
-                    document.getElementById(`card-${i}`).className = 'card expired';
-                    document.getElementById('alarm-finished').play();
-                }
+    clearInterval(timers[i]);
+    const el = document.getElementById(`timer-${i}`);
+    if(el) el.innerText = "00:00";
+
+    document.getElementById(`card-${i}`).className = 'card expired';
+    document.getElementById('alarm-finished').play();
+
+    // 🔊 VOICE PERINGATAN
+    speakExpired(unitNames[i]);
+}
             }, 1000);
         }
 
@@ -705,7 +709,23 @@ if (savedUser) {
         deferredPrompt = null;
         console.log('PWA was installed');
     });
-    
+    <script>
+function speakExpired(unitName) {
+    if (!('speechSynthesis' in window)) return;
+
+    const msg = new SpeechSynthesisUtterance(
+        `nomor ${unitName}. sudah habis mi ketua.`
+    );
+
+    msg.lang = 'id-ID';
+    msg.rate = 1;   // kecepatan bicara
+    msg.pitch = 3;    // nada suara
+    msg.volume = 3;   // volume
+
+    window.speechSynthesis.cancel(); // hentikan suara lain
+    window.speechSynthesis.speak(msg);
+}
+</script>
 </script>
 </body>
 </html>
