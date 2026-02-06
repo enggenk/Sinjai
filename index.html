@@ -194,14 +194,8 @@
                 <h3>💾 Database</h3>
                 <button onclick="exportData()" class="btn-main" style="background:var(--accent)">EXPORT DATA (JSON)</button>
             </div>
-// Ubah fungsi onclick pada tombol logout menjadi seperti ini:
-<button onclick="logout()" class="btn-main" style="background:var(--primary); margin-top: 20px;">LOGOUT</button>
-
-// Tambahkan fungsi logout di script:
-function logout() {
-    localStorage.removeItem('savedUser');
-    location.reload();
-}
+            <button onclick="location.reload()" class="btn-main" style="background:var(--primary); margin-top: 20px;">LOGOUT</button>
+        </div>
 
         <div class="taskbar">
             <button class="nav-item active" onclick="switchView('units', this)"><span>🏎️</span>Unit</button>
@@ -301,26 +295,7 @@ function logout() {
             activeDurations = data.activeDurations || {};
             activeStaff = data.activeStaff || {};
             activeTransferInfo = data.activeTransferInfo || {};
-// ... (kode yang sudah ada tetap di sini) ...
 
-    document.getElementById('loading-text').style.display = 'none';
-    
-    // CEK APAKAH ADA USER YANG TERSIMPAN
-    const savedUser = localStorage.getItem('savedUser');
-    if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        document.getElementById('current-user-display').innerText = "Aktif: " + currentUser.user;
-    } else {
-        document.getElementById('login-form').style.display = 'block';
-    }
-
-    if (currentUser) {
-        applyPermissions(); initDashboard(); renderQueue(); renderLogs(); renderUserList();
-        // ... (kode sisa tetap di sini) ...
-    }
-});
             document.getElementById('loading-text').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
 
@@ -341,23 +316,17 @@ function logout() {
         }
 
         function attemptLogin() {
-    const u = document.getElementById('user-input').value;
-    const p = document.getElementById('pass-input').value;
-    const userFound = users.find(x => x.user === u && x.pass === p);
-    
-    if (userFound) {
-        currentUser = userFound;
-        // SIMPAN KE STORAGE
-        localStorage.setItem('savedUser', JSON.stringify(userFound)); 
-        
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        document.getElementById('current-user-display').innerText = "Aktif: " + currentUser.user;
-        applyPermissions(); initDashboard(); renderQueue(); renderLogs(); renderUserList();
-    } else { 
-        document.getElementById('login-err').style.display = 'block'; 
-    }
-}
+            const u = document.getElementById('user-input').value;
+            const p = document.getElementById('pass-input').value;
+            const userFound = users.find(x => x.user === u && x.pass === p);
+            if (userFound) {
+                currentUser = userFound;
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                document.getElementById('current-user-display').innerText = "Aktif: " + currentUser.user;
+                applyPermissions(); initDashboard(); renderQueue(); renderLogs(); renderUserList();
+            } else { document.getElementById('login-err').style.display = 'block'; }
+        }
 
         function applyPermissions() {
             const isAdmin = currentUser && currentUser.role === 'admin';
