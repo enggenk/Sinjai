@@ -120,7 +120,9 @@
                 </div>
             </div>
             <div class="grid" id="unit-container"></div>
-            <button class="btn-main" style="margin-top:25px; background:var(--primary)" onclick="addNewUnit()">+ Tambah Unit</button>
+           <button class="btn-main" onclick="addNewUnit()" id="btn-add-unit">
++ Tambah Unit
+</button>
         </div>
 
         <div id="view-queue" class="view-section">
@@ -367,11 +369,21 @@ if (savedUser) {
 }
 
         function applyPermissions() {
-            const isAdmin = currentUser && currentUser.role === 'admin';
-            document.querySelectorAll('.restrict-admin').forEach(el => { 
-                el.style.display = isAdmin ? 'block' : 'none'; 
-            });
-        }
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const canManageUnit = currentUser &&
+        (currentUser.role === 'admin' || currentUser.role === 'staff');
+
+    // 🔐 Khusus menu & fitur ADMIN
+    document.querySelectorAll('.restrict-admin').forEach(el => { 
+        el.style.display = isAdmin ? 'block' : 'none'; 
+    });
+
+    // ➕ Tombol Tambah Unit (ADMIN + STAFF)
+    const btnAdd = document.getElementById('btn-add-unit');
+    if (btnAdd) {
+        btnAdd.style.display = canManageUnit ? 'block' : 'none';
+    }
+}
 
         function switchView(viewId, btn) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
@@ -393,9 +405,10 @@ if (savedUser) {
                             <div style="font-weight:800">${name}</div>
                             <div style="display:flex; gap:8px;">
                                 ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--accent); font-size:1rem; padding:0;">🔄</button>` : ''}
-                                <div style="display:${isAdmin ? 'flex' : 'none'}; gap:5px;">
-                                    <button onclick="editUnitName(${i})" style="background:none; color:var(--accent); padding:0;">✏️</button>
-                                    <button onclick="deleteUnit(${i})" style="background:none; color:var(--danger); padding:0;">🗑️</button>
+                                <div style="display:${canManageUnit ? 'flex' : 'none'}; gap:5px;">
+    <button onclick="editUnitName(${i})" style="background:none; color:var(--accent); padding:0;">✏️</button>
+    <button onclick="deleteUnit(${i})" style="background:none; color:var(--danger); padding:0;">🗑️</button>
+</div>
                                 </div>
                             </div>
                         </div>
@@ -614,7 +627,8 @@ if (card) {
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-            const isAdmin = currentUser && currentUser.role === 'admin';
+            const canManageUnit = currentUser && 
+    (currentUser.role === 'admin' || currentUser.role === 'staff');
             
             let filtered = logs.filter(l => {
                 if (currentReportFilter === 'daily') return l.end >= startOfDay;
