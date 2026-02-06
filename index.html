@@ -380,7 +380,7 @@ if (savedUser) {
             const isAdmin = currentUser && currentUser.role === 'admin';
 
             unitNames.forEach((name, i) => {
-                const isActive = (endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]));
+                const isActive = !!endTimes[i];
                 container.innerHTML += `
                     <div class="card ${isActive ? 'active-run' : ''}" id="card-${i}">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
