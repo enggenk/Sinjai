@@ -449,7 +449,7 @@ if (savedUser) {
             if(!ctrl) return;
             ctrl.innerHTML = `
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
-                    <button style="grid-column:span 2; font-size:0.7rem; background:${isPaid[i]?'var(--success)':'var(--danger)'}; color:white" onclick="confirmTogglePay(${i})">${isPaid[i]?'LUNAS':'TAGIH'}</button>
+                    <button style="grid-column:span 2; font-size:0.7rem; background:${isPaid[i]?'var(--success)':'var(--danger)'}; color:white" onclick="confirmTogglePay(${i})">${isPaid[i]?'LUNAS':'BELUM BAYAR'}</button>
                     <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, -60000)">-1</button>
                     <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, 60000)">+1</button>
                     <button style="background:var(--warning); color:white" onclick="pause(${i})">${isPaused[i]?'GO':'PAUSE'}</button>
