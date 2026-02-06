@@ -722,6 +722,17 @@ if (savedUser) {
         deferredPrompt = null;
         console.log('PWA was installed');
     });
+    function readUnitName(unitName) {
+    // Ambil hanya angka
+    const num = unitName.replace(/\D/g, '');
+    if (!num) return unitName;
+
+    // Baca per digit → "1" jadi "satu"
+    const digitMap = ['nol','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan'];
+    const spoken = num.split('').map(d => digitMap[d]).join(' ');
+
+    return `unit ${spoken}`;
+}
 function speakExpired(unitName) {
     if (!('speechSynthesis' in window)) return;
 
@@ -736,6 +747,22 @@ function speakExpired(unitName) {
 
     window.speechSynthesis.cancel(); // hentikan suara lain
     window.speechSynthesis.speak(msg);
+}function speakExpired(unitName) {
+    if (!('speechSynthesis' in window)) return;
+
+    const safeUnit = readUnitName(unitName);
+
+    const msg = new SpeechSynthesisUtterance(
+        `${safeUnit} sudah habis mi ketua`
+    );
+
+    msg.lang = 'id-ID';
+    msg.rate = 2;
+    msg.pitch = 5;
+    msg.volume = 5;
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(msg);
 }
 function speakExpiredUnits() {
     if (!('speechSynthesis' in window)) return;
@@ -755,7 +782,7 @@ function speakExpiredUnits() {
         return idx !== -1 && !isPaid[idx];
     });
 
-    let message = `nomor ${unitText} sudah habis mi ketua.`;
+    let message = `tor monitor ketua ${unitText} habismi.`;
 
     if (unpaidUnits.length > 0) {
         const unpaidText =
