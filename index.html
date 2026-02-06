@@ -600,5 +600,24 @@
             if(el) el.innerText = new Date().toLocaleTimeString('id-ID'); 
         }, 1000);
     </script>
+    // Mendaftarkan Service Worker agar muncul prompt instalasi
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker terdaftar!', reg))
+      .catch(err => console.error('Gagal daftar Service Worker:', err));
+  });
+}
+
+// Opsional: Menangkap event instalasi untuk kustomisasi
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Mencegah Chrome memunculkan prompt otomatis terlalu cepat
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Anda bisa memicu munculnya tombol "Instal Aplikasi" di sini jika mau
+  console.log('Aplikasi siap diinstal');
+});
 </body>
 </html>
