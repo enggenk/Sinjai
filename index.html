@@ -773,12 +773,12 @@ function speakExpiredUnits() {
                 : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);
 
         const alertMsg = new SpeechSynthesisUtterance(
-            `${unpaidText} itu belumpi dibayar, nahhh!!!.`
+            `${unpaidText} itu belumpi dibayar ketua.`
         );
         alertMsg.lang = 'id-ID';
-        alertMsg.rate = 1.05;   // lebih cepat
-        alertMsg.pitch = 0.7;   // lebih berat
-        alertMsg.volume = 1.3;  // 🔥 LEBIH KERAS
+        alertMsg.rate = 1,5;   // lebih cepat
+        alertMsg.pitch = 2;   // lebih berat
+        alertMsg.volume = 3;  // 🔥 LEBIH KERAS
 
         // kasih jeda dikit setelah voice pertama
         setTimeout(() => {
