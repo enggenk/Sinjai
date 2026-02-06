@@ -426,21 +426,19 @@ if (savedUser) {
                         document.getElementById('alarm-warning').play();
                         warningPlayed[i] = true;
                     }
-                } else {
+} else {
     clearInterval(timers[i]);
-    const el = document.getElementById(`timer-${i}`);
-    if(el) el.innerText = "00:00";
-   const card = document.getElementById(`card-${i}`);
-    card.className = 'card expired pin-top'; // 🔒 PIN DI ATAS
 
-    document.getElementById(`card-${i}`).className = 'card expired';
+    const el = document.getElementById(`timer-${i}`);
+    if (el) el.innerText = "00:00";
+
+    const card = document.getElementById(`card-${i}`);
+    card.className = 'card expired pin-top'; // 🔒 TETAP DI ATAS
+
     document.getElementById('alarm-finished').play();
     expiredUnits.add(unitNames[i]);
 
-    // 🔁 mulai voice loop global
     startVoiceLoop();
-
-    // 🔊 VOICE PERINGATAN
     speakExpired(unitNames[i]);
 }
             }, 1000);
