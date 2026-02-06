@@ -1031,8 +1031,7 @@ function speakUnitExpired(i) {
     msg.pitch = 1;
     msg.volume = 1;
 
-    // 🔥 PAKSA NOMOR DARI INDEX KARTU
-    const nomorUnit = i + 1;
+    const nomorUnit = getVisibleUnitNumber(i);
 
     msg.text = `nomor ${nomorUnit} sudah habis mi ketua`;
 
