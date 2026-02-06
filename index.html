@@ -120,9 +120,7 @@
                 </div>
             </div>
             <div class="grid" id="unit-container"></div>
-           <button class="btn-main" onclick="addNewUnit()" id="btn-add-unit">
-+ Tambah Unit
-</button>
+            <button class="btn-main" style="margin-top:25px; background:var(--primary)" onclick="addNewUnit()">+ Tambah Unit</button>
         </div>
 
         <div id="view-queue" class="view-section">
@@ -342,7 +340,8 @@ if (savedUser) {
                 activeUsers, activeDurations, activeStaff, activeTransferInfo
             });
         }
-function attemptLogin() {
+
+        function attemptLogin() {
     const u = document.getElementById('user-input').value;
     const p = document.getElementById('pass-input').value;
     const userFound = users.find(x => x.user === u && x.pass === p);
@@ -350,12 +349,12 @@ function attemptLogin() {
     if (userFound) {
         currentUser = userFound;
 
+        // 🔐 SIMPAN SESSION LOGIN
         localStorage.setItem('currentUser', JSON.stringify(userFound));
 
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('app').style.display = 'block';
-        document.getElementById('current-user-display').innerText =
-            "Aktif: " + currentUser.user;
+        document.getElementById('current-user-display').innerText = "Aktif: " + currentUser.user;
 
         applyPermissions();
         initDashboard();
@@ -367,55 +366,12 @@ function attemptLogin() {
     }
 }
 
-function canEditUnit() {
-    return currentUser &&
-        (currentUser.role === 'admin' || currentUser.role === 'staff');
-}
-
-function addNewUnit() {
-    if (!canEditUnit()) {
-        alert("Tidak punya akses");
-        return;
-    }
-
-    const n = prompt("Nama Unit:");
-    if (n) {
-        unitNames.push(n);
-        saveAppState();
-    }
-}
-
-
-// ➕ TAMBAH UNIT
-function addNewUnit() {
-    if (!canEditUnit()) {
-        alert("Tidak punya akses");
-        return;
-    }
-
-    const n = prompt("Nama Unit:");
-    if (n) {
-        unitNames.push(n);
-        saveAppState();
-    }
-}
-
         function applyPermissions() {
-    const isAdmin = currentUser && currentUser.role === 'admin';
-    const canManageUnit = currentUser &&
-        (currentUser.role === 'admin' || currentUser.role === 'staff');
-
-    // 🔐 Khusus menu & fitur ADMIN
-    document.querySelectorAll('.restrict-admin').forEach(el => { 
-        el.style.display = isAdmin ? 'block' : 'none'; 
-    });
-
-    // ➕ Tombol Tambah Unit (ADMIN + STAFF)
-    const btnAdd = document.getElementById('btn-add-unit');
-    if (btnAdd) {
-        btnAdd.style.display = canManageUnit ? 'block' : 'none';
-    }
-}
+            const isAdmin = currentUser && currentUser.role === 'admin';
+            document.querySelectorAll('.restrict-admin').forEach(el => { 
+                el.style.display = isAdmin ? 'block' : 'none'; 
+            });
+        }
 
         function switchView(viewId, btn) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
@@ -425,12 +381,10 @@ function addNewUnit() {
         }
 
         function initDashboard() {
-    const container = document.getElementById('unit-container'); 
-    container.innerHTML = "";
+            const container = document.getElementById('unit-container'); 
+            container.innerHTML = "";
+            const isAdmin = currentUser && currentUser.role === 'admin';
 
-    const isAdmin = currentUser && currentUser.role === 'admin';
-    const canManageUnit = currentUser &&
-        (currentUser.role === 'admin' || currentUser.role === 'staff');
             unitNames.forEach((name, i) => {
                 const isActive = !!endTimes[i];
                 container.innerHTML += `
@@ -439,10 +393,9 @@ function addNewUnit() {
                             <div style="font-weight:800">${name}</div>
                             <div style="display:flex; gap:8px;">
                                 ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--accent); font-size:1rem; padding:0;">🔄</button>` : ''}
-                                <div style="display:${canManageUnit ? 'flex' : 'none'}; gap:5px;">
-    <button onclick="editUnitName(${i})" style="background:none; color:var(--accent); padding:0;">✏️</button>
-    <button onclick="deleteUnit(${i})" style="background:none; color:var(--danger); padding:0;">🗑️</button>
-</div>
+                                <div style="display:${isAdmin ? 'flex' : 'none'}; gap:5px;">
+                                    <button onclick="editUnitName(${i})" style="background:none; color:var(--accent); padding:0;">✏️</button>
+                                    <button onclick="deleteUnit(${i})" style="background:none; color:var(--danger); padding:0;">🗑️</button>
                                 </div>
                             </div>
                         </div>
@@ -661,8 +614,7 @@ if (card) {
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-            const canManageUnit = currentUser && 
-    (currentUser.role === 'admin' || currentUser.role === 'staff');
+            const isAdmin = currentUser && currentUser.role === 'admin';
             
             let filtered = logs.filter(l => {
                 if (currentReportFilter === 'daily') return l.end >= startOfDay;
@@ -715,7 +667,7 @@ if (card) {
         function adjustTime(i, ms) { endTimes[i] += ms; saveAppState(); }
         function pause(i) { isPaused[i] = !isPaused[i]; saveAppState(); }
         function editUnitName(i) { const n = prompt("Nama baru:", unitNames[i]); if(n) { unitNames[i] = n; saveAppState(); } }
-      
+        function addNewUnit() { const n = prompt("Nama Unit:"); if(n){ unitNames.push(n); saveAppState(); }}
         function deleteUnit(i) { if(confirm("Hapus unit?")){ unitNames.splice(i, 1); saveAppState(); }}
         function clearAllLogs() { if(confirm("Hapus semua history?")) { logs = []; saveAppState(); }}
         function deleteLog(i) { logs.splice(i, 1); saveAppState(); }
