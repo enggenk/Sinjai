@@ -282,6 +282,8 @@
         let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
+        let expiredUnits = new Set();     // unit yang sudah habis
+let voiceInterval = null;        // interval voice global
 
         db.ref('app_data').on('value', (snapshot) => {
             const data = snapshot.val() || {};
@@ -427,6 +429,10 @@ if (savedUser) {
 
     document.getElementById(`card-${i}`).className = 'card expired';
     document.getElementById('alarm-finished').play();
+    expiredUnits.add(unitNames[i]);
+
+    // 🔁 mulai voice loop global
+    startVoiceLoop();
 
     // 🔊 VOICE PERINGATAN
     speakExpired(unitNames[i]);
@@ -526,6 +532,13 @@ if (savedUser) {
         }
 
         function finalStop(i, markAsPaid) { 
+          // 🔇 HENTIKAN VOICE UNTUK UNIT INI
+    expiredUnits.delete(unitNames[i]);
+
+    // 🔕 Jika tidak ada unit expired lain, matikan voice loop
+    if (expiredUnits.size === 0) {
+        stopVoiceLoop();
+    }
             if(markAsPaid) isPaid[i] = true; 
             logs.unshift({ 
                 unit: unitNames[i], start: startTimes[i], end: Date.now(), 
@@ -723,6 +736,59 @@ function speakExpired(unitName) {
 
     window.speechSynthesis.cancel(); // hentikan suara lain
     window.speechSynthesis.speak(msg);
+}
+function speakExpiredUnits() {
+    if (!('speechSynthesis' in window)) return;
+    if (expiredUnits.size === 0) return;
+
+    const units = Array.from(expiredUnits);
+
+    // Gabung dengan "dan"
+    const unitText =
+        units.length === 1
+            ? units[0]
+            : units.slice(0, -1).join(', ') + ' dan ' + units.slice(-1);
+
+    // cek apakah ada yang belum bayar
+    const unpaidUnits = units.filter(name => {
+        const idx = unitNames.indexOf(name);
+        return idx !== -1 && !isPaid[idx];
+    });
+
+    let message = `Perhatian. Sesi ${unitText} telah habis.`;
+
+    if (unpaidUnits.length > 0) {
+        const unpaidText =
+            unpaidUnits.length === 1
+                ? unpaidUnits[0]
+                : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);
+
+        message += ` ${unpaidText} belum melakukan pembayaran.`;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = 'id-ID';
+    utterance.rate = 0.95;
+    utterance.volume = 1;
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+}
+function startVoiceLoop() {
+    if (voiceInterval) return;
+
+    speakExpiredUnits(); // langsung bicara pertama kali
+
+    voiceInterval = setInterval(() => {
+        speakExpiredUnits();
+    }, 10000);
+}
+
+function stopVoiceLoop() {
+    clearInterval(voiceInterval);
+    voiceInterval = null;
+    expiredUnits.clear();
+    speechSynthesis.cancel();
 }
 </script>
 </body>
