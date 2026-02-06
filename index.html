@@ -1031,7 +1031,7 @@ function speakUnitExpired(unitIndex) {
     msg.pitch = 1;
     msg.volume = 1;
 
-    msg.text = `Perhatian, unit nomor ${unitIndex + 1} telah habis`;
+    msg.text = `unit nomor ${unitIndex + 1} habis mi ketua`;
 
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(msg);
@@ -1043,7 +1043,7 @@ function startExpiredVoiceRepeat(i) {
         if (isExpired[i]) {
             speakUnitExpired(i);
         }
-    }, 30000); // 30 detik
+    }, 10000); // 30 detik
 }
 
 function stopExpiredVoiceRepeat(i) {
