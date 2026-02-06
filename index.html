@@ -519,14 +519,16 @@ body {
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let users = [], unitNames = [], prices = {}, logs = [], queue = [];
-        let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
-        let isExpired = {};
-        let unitNumbers = [];
-        let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
-        let speechUnlocked = false;
+        let users = [], unitNames = [], unitNumbers = [], prices = {}, logs = [], queue = [];
+let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {},
+    activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
+let isExpired = {};
+let expiredVoiceTimers = {};
+let speechUnlocked = false;
+let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         function speakUnitExpired(i) {
     if (!('speechSynthesis' in window)) return;
+    if (!unitNumbers[i]) return;
 
     const msg = new SpeechSynthesisUtterance();
     msg.lang = 'id-ID';
@@ -534,20 +536,15 @@ body {
     msg.pitch = 1;
     msg.volume = 1;
 
-    const nomorUnit = unitNumbers[i];
-
-    msg.text = `nomor ${nomorUnit} sudah habismi ketua`;
-
+    msg.text = `Perhatian operator, unit nomor ${unitNumbers[i]} telah habis`;
     window.speechSynthesis.speak(msg);
 }
-function startExpiredVoiceRepeat(i) {
-    stopExpiredVoiceRepeat(i); // pastikan tidak dobel
 
+function startExpiredVoiceRepeat(i) {
+    stopExpiredVoiceRepeat(i);
     expiredVoiceTimers[i] = setInterval(() => {
-        if (isExpired[i]) {
-            speakUnitExpired(i);
-        }
-    }, 10000); // 30 detik
+        if (isExpired[i]) speakUnitExpired(i);
+    }, 10000);
 }
 
 function stopExpiredVoiceRepeat(i) {
@@ -563,11 +560,9 @@ function unlockSpeech() {
 
     const u = new SpeechSynthesisUtterance('');
     u.lang = 'id-ID';
-
     window.speechSynthesis.speak(u);
     speechUnlocked = true;
 }
-        let expiredVoiceTimers = {}; 
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
 
         db.ref('app_data').on('value', (snapshot) => {
@@ -705,10 +700,8 @@ if (savedUser) {
         if (isActive) resumeTimer(i);
     });
 }
-
 function resumeTimer(i) {
     if (timers[i]) clearInterval(timers[i]);
-    renderRunningCtrl(i);
 
     timers[i] = setInterval(() => {
         if (isPaused[i]) {
@@ -719,41 +712,35 @@ function resumeTimer(i) {
         const diff = endTimes[i] - Date.now();
 
         if (diff > 0) {
-            let m = Math.floor(diff / 60000);
-            let s = Math.floor((diff % 60000) / 1000);
-
+            const m = Math.floor(diff / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
             const el = document.getElementById(`timer-${i}`);
             if (el) el.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
 
             if (diff <= 60000 && !warningPlayed[i]) {
-                document.getElementById(`card-${i}`).classList.add('warning-near');
-                document.getElementById('alarm-warning').play();
+                document.getElementById(`card-${i}`)?.classList.add('warning-near');
+                document.getElementById('alarm-warning')?.play();
                 warningPlayed[i] = true;
             }
         } else {
-            // ⏰ WAKTU HABIS
             clearInterval(timers[i]);
-
             isExpired[i] = true;
             saveAppState();
 
             const el = document.getElementById(`timer-${i}`);
             if (el) el.innerText = "00:00";
 
-            const card = document.getElementById(`card-${i}`);
-            if (card) card.classList.add('expired');
+            document.getElementById('alarm-finished')?.play();
 
-            document.getElementById('alarm-finished').play();
-            launchConfetti(60);
-
-            if (!expiredVoiceTimers[i]) {
-                speakUnitExpired(i);
-                startExpiredVoiceRepeat(i);
-            }
+            if (!expiredVoiceTimers[i] && !warningPlayed[i]) {
+    speakUnitExpired(i);
+    startExpiredVoiceRepeat(i);
+}
         }
     }, 1000);
 }
 
+          
         function renderRunningCtrl(i) {
             const ctrl = document.getElementById(`ctrl-${i}`);
             if(!ctrl) return;
@@ -818,19 +805,26 @@ function resumeTimer(i) {
         
         function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeModal(); }
 
-        function startUnit(i, dur, paid, userName) { 
-          unlockSpeech();
-            stopExpiredVoiceRepeat(i);
-            const now = Date.now();
-            startTimes[i] = now;
-            endTimes[i] = now + (dur * 60 * 1000); 
-            isPaid[i] = paid; isPaused[i] = false; activeUsers[i] = userName || ""; 
-            activeDurations[i] = dur; activeStaff[i] = currentUser.user; 
-            delete activeTransferInfo[i];
-delete isExpired[i];
-            warningPlayed[i] = false; 
-            saveAppState();
-        }
+        function startUnit(i, dur, paid, userName) {
+    unlockSpeech();
+    stopExpiredVoiceRepeat(i); // 🔥 RESET VOICE STATE
+    warningPlayed[i] = = false; // ⬅️ PASTIKAN RESET
+
+    const now = Date.now();
+    startTimes[i] = now;
+    endTimes[i] = now + (dur * 60 * 1000);
+    isPaid[i] = paid;
+    isPaused[i] = false;
+    activeUsers[i] = userName || "";
+    activeDurations[i] = dur;
+    activeStaff[i] = currentUser.user;
+
+    delete activeTransferInfo[i];
+    delete isExpired[i];
+    warningPlayed[i] = false;
+
+    saveAppState();
+}
 
         function triggerStop(i) { 
             stopIdx = i; 
@@ -854,20 +848,9 @@ delete isExpired[i];
       function finalStop(i, markAsPaid) {
     if (markAsPaid) isPaid[i] = true;
 
-    logs.unshift({
-        unit: unitNames[i],
-        start: startTimes[i],
-        end: Date.now(),
-        dur: activeDurations[i],
-        paid: isPaid[i],
-        cost: prices[activeDurations[i]],
-        staff: activeStaff[i]
-    });
+    stopExpiredVoiceRepeat(i); // 🔇 WAJIB
 
     clearInterval(timers[i]);
-
-    stopExpiredVoiceRepeat(i); // 🔇 HENTIKAN SUARA ULANG
-
     delete endTimes[i];
     delete startTimes[i];
     delete activeUsers[i];
