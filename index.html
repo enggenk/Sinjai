@@ -97,12 +97,15 @@
             <span style="font-size:4rem">🏎️</span>
             <h1 style="margin: 0 0 20px 0; color: var(--primary);">YSA021 Sinjai</h1>
             <div id="loading-text">Menghubungkan ke Server...</div>
-            <div id="login-form" style="display:none;">
-                <input type="text" id="user-input" placeholder="Username">
-                <input type="password" id="pass-input" placeholder="Password">
-                <button onclick="attemptLogin()" class="btn-main" style="margin-top:10px">MASUK SISTEM</button>
-                <p id="login-err" style="color:var(--danger); font-size:0.8rem; margin-top:10px; display:none;">Akses Ditolak!</p>
-            </div>
+   <div id="login-form" style="display:none;">
+    <select id="user-input" style="background: white;">
+        <option value="" disabled selected>Pilih Nama Akun...</option>
+    </select>
+    
+    <input type="password" id="pass-input" placeholder="Password">
+    <button onclick="attemptLogin()" class="btn-main" style="margin-top:10px">MASUK SISTEM</button>
+    <p id="login-err" style="color:var(--danger); font-size:0.8rem; margin-top:10px; display:none;">Akses Ditolak!</p>
+</div>
         </div>
     </div>
 
@@ -280,9 +283,41 @@
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
 
-        db.ref('app_data').on('value', (snapshot) => {
+                db.ref('app_data').on('value', (snapshot) => {
             const data = snapshot.val() || {};
             users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
+            unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
+            // ... (variabel lain tetap sama) ...
+            activeTransferInfo = data.activeTransferInfo || {};
+
+            // --- TAMBAHAN KODE DI SINI ---
+            // Mengisi dropdown login dengan daftar user yang ada
+            const loginSelect = document.getElementById('user-input');
+            // Simpan nilai yang sedang dipilih (jika ada refresh data mendadak agar tidak reset)
+            const currentSelection = loginSelect.value;
+            
+            loginSelect.innerHTML = '<option value="" disabled selected>Pilih Nama Akun...</option>';
+            
+            users.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.user;
+                // Menampilkan nama user dan role (misal: Admin atau Staff)
+                opt.innerText = u.user.toUpperCase() + (u.role === 'admin' ? ' (Admin)' : ''); 
+                loginSelect.appendChild(opt);
+            });
+
+            // Kembalikan pilihan jika sebelumnya sudah memilih
+            if(currentSelection) loginSelect.value = currentSelection;
+            // -----------------------------
+
+            document.getElementById('loading-text').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+
+            if (currentUser) {
+                 // ... kode lainnya tetap sama
+            }
+        });
+            
             unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
             prices = data.prices || { "15": 10000, "30": 18000, "60": 35000 };
             logs = data.logs || [];
