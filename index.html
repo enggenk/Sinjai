@@ -398,41 +398,44 @@ if (savedUser) {
         }
 
         function initDashboard() {
-            const container = document.getElementById('unit-container'); 
-            container.innerHTML = "";
-            const isAdmin = currentUser && currentUser.role === 'admin';
+    const container = document.getElementById('unit-container');
+    container.innerHTML = "";
+    const isAdmin = currentUser && currentUser.role === 'admin';
 
-            unitNames.forEach((name, i) => {
-    const isActive = (endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]));
-    const expiredClass = isExpired[i] ? 'expired' : '';
-    const activeClass = isActive ? 'active-run' : '';
+    unitNames.forEach((name, i) => {
+        const isActive = (endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]));
+        const expiredClass = isExpired[i] ? 'expired' : '';
+        const activeClass = isActive ? 'active-run' : '';
 
-  container.innerHTML += `
-<div class="card ${activeClass} ${expiredClass}" id="card-${i}">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-weight:800">${name}</div>
-        <div style="display:flex; gap:8px;">
-            ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--accent); font-size:1rem; padding:0;">🔄</button>` : ''}
-            <div style="display:${isAdmin ? 'flex' : 'none'}; gap:5px;">
-                <button onclick="editUnitName(${i})">✏️</button>
-                <button onclick="deleteUnit(${i})">🗑️</button>
+        container.innerHTML += `
+        <div class="card ${activeClass} ${expiredClass}" id="card-${i}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:800">${name}</div>
+                <div style="display:flex; gap:8px;">
+                    ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--accent)">🔄</button>` : ''}
+                    <div style="display:${isAdmin ? 'flex' : 'none'}; gap:5px;">
+                        <button onclick="editUnitName(${i})">✏️</button>
+                        <button onclick="deleteUnit(${i})">🗑️</button>
+                    </div>
+                </div>
             </div>
+
+            <div class="user-tag">${activeUsers[i] || ""}</div>
+            <div class="transfer-tag">${activeTransferInfo[i] ? "Pindahan dari " + activeTransferInfo[i] : ""}</div>
+
+            <div class="timer-display" id="timer-${i}">00:00</div>
+
+            <div id="ctrl-${i}">
+                ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">MULAI</button>`}
+            </div>
+
+            <div class="staff-badge">${activeStaff[i] ? "Oleh: " + activeStaff[i] : ""}</div>
         </div>
-    </div>
+        `;
 
-    <div class="user-tag">${activeUsers[i] || ""}</div>
-    <div class="transfer-tag">${activeTransferInfo[i] ? "Pindahan dari " + activeTransferInfo[i] : ""}</div>
-    <div class="timer-display" id="timer-${i}">00:00</div>
-
-    <div id="ctrl-${i}">
-        ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">MULAI</button>`}
-    </div>
-
-    <div class="staff-badge">${activeStaff[i] ? "Oleh: " + activeStaff[i] : ""}</div>
-</div>`;
-                if(isActive) resumeTimer(i);
-            });
-        }
+        if (isActive) resumeTimer(i);
+    });
+}
 
         function resumeTimer(i) {
     if (timers[i]) clearInterval(timers[i]);
