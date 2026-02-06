@@ -522,6 +522,7 @@ body {
         let users = [], unitNames = [], prices = {}, logs = [], queue = [];
         let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
         let isExpired = {};
+        let unitNumbers = [];
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         let speechUnlocked = false;
 
@@ -542,6 +543,7 @@ function unlockSpeech() {
             const data = snapshot.val() || {};
             users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
             unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
+unitNumbers = data.unitNumbers || unitNames.map((_, i) => i + 1);
             prices = data.prices || { "15": 10000, "30": 18000, "60": 35000 };
             logs = data.logs || [];
             queue = data.queue || [];
@@ -585,12 +587,13 @@ if (savedUser) {
 
         function saveAppState() {
             db.ref('app_data').update({
-                users, units: unitNames, prices, logs, queue,
-                endTimes, startTimes, isPaused, isPaid,
-                activeUsers, activeDurations, activeStaff, activeTransferInfo,
-                isExpired
-                
-            });
+    users, units: unitNames, unitNumbers,
+    prices, logs, queue,
+    endTimes, startTimes, isPaused, isPaid,
+    activeUsers, activeDurations, activeStaff, activeTransferInfo,
+    isExpired
+});
+            
         }
 
         function attemptLogin() {
@@ -938,8 +941,22 @@ delete isExpired[i];
         function adjustTime(i, ms) { endTimes[i] += ms; saveAppState(); }
         function pause(i) { isPaused[i] = !isPaused[i]; saveAppState(); }
         function editUnitName(i) { const n = prompt("Nama baru:", unitNames[i]); if(n) { unitNames[i] = n; saveAppState(); } }
-        function addNewUnit() { const n = prompt("Nama Unit:"); if(n){ unitNames.push(n); saveAppState(); }}
-        function deleteUnit(i) { if(confirm("Hapus unit?")){ unitNames.splice(i, 1); saveAppState(); }}
+        function addNewUnit() {
+    const n = prompt("Nama Unit:");
+    if (n) {
+        unitNames.push(n);
+        const maxNum = unitNumbers.length ? Math.max(...unitNumbers) : 0;
+        unitNumbers.push(maxNum + 1); // 🔥 NOMOR UNIK & STABIL
+        saveAppState();
+    }
+}
+        function deleteUnit(i) {
+    if (confirm("Hapus unit?")) {
+        unitNames.splice(i, 1);
+        unitNumbers.splice(i, 1);
+        saveAppState();
+    }
+}
         function clearAllLogs() { if(confirm("Hapus semua history?")) { logs = []; saveAppState(); }}
         function deleteLog(i) { logs.splice(i, 1); saveAppState(); }
         function setReportFilter(t, b) { currentReportFilter = t; document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); renderLogs(); }
@@ -1035,8 +1052,21 @@ function launchConfetti(count = 40) {
         setTimeout(() => confetti.remove(), 4000);
     }
 }
-function getVisibleUnitNumber(cardIndex) {
-    const cards = Array.from(document.querySelectorAll('#unit-container .card'));
+function speakUnitExpired(i) {
+    if (!('speechSynthesis' in window)) return;
+
+    const msg = new SpeechSynthesisUtterance();
+    msg.lang = 'id-ID';
+    msg.rate = 0.95;
+    msg.pitch = 1;
+    msg.volume = 1;
+
+    const nomorUnit = unitNumbers[i]; // 🔥 STABIL & BENAR
+
+    msg.text = `Perhatian operator, unit nomor ${nomorUnit} telah habis`;
+
+    window.speechSynthesis.speak(msg);
+}
 
     // Urutkan sesuai order CSS + posisi DOM
     const sorted = cards
