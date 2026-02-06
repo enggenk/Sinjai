@@ -231,7 +231,7 @@
         <div class="modal-box">
             <h2 id="stop-msg"></h2>
             <div id="check-return-section">
-                <button class="btn-main" style="background:var(--success)" onclick="showPaymentAction()">ADAMI!!!</button>
+                <button class="btn-main" style="background:var(--success)" onclick="showPaymentAction()">ADAMI !!!</button>
                 <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>
             </div>
             <div id="payment-action-section" style="display:none; margin-top: 15px;">
@@ -541,7 +541,7 @@ function initDashboard() {
         function triggerStop(i) { 
             stopIdx = i; 
             document.getElementById('modal-stop-confirm').style.display = 'flex'; 
-            document.getElementById('stop-msg').innerText = "Mobil sudah ada? " + unitNames[i]; 
+            document.getElementById('stop-msg').innerText = "Mobil nomor " + unitNames[i] ; 
             document.getElementById('check-return-section').style.display = 'block'; 
             document.getElementById('payment-action-section').style.display = 'none'; 
         }
@@ -553,7 +553,7 @@ function initDashboard() {
             document.getElementById('payment-status-display').innerHTML = isPaid[stopIdx] ? 
                 `<h2 style="color:var(--success)">LUNAS</h2>` : `<h2 style="color:var(--danger)">TAGIHAN: Rp ${cost.toLocaleString()}</h2>`; 
             document.getElementById('stop-final-btn-group').innerHTML = `
-                <button class="btn-main" style="background:var(--success)" onclick="finalStop(${stopIdx}, ${!isPaid[stopIdx]})">SELESAI</button> 
+                <button class="btn-main" style="background:var(--success)" onclick="finalStop(${stopIdx}, ${!isPaid[stopIdx]})">SUDAH BAYAR MI</button> 
                 <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>`; 
         }
 
