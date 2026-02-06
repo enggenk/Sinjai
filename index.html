@@ -88,6 +88,16 @@
     </style>
 </head>
 <body>
+  <button id="btnInstalApp" onclick="triggerInstall()" style="margin-top:10px; background: #22c55e; color: white; display: block; width: 100%; border-radius: 15px; padding: 12px; font-weight: bold; border: none;">
+    📥 INSTAL APLIKASI SINJAI
+</button>
+
+<div id="install-container" style="display:none; margin: 20px; padding: 15px; background: var(--accent); color: white; border-radius: 15px; text-align: center;">
+    <p style="margin: 0 0 10px 0;">Gunakan aplikasi agar lebih ringan & cepat!</p>
+    <button onclick="triggerInstall()" style="background: white; color: var(--accent); border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; width: 100%;">
+        INSTAL SEKARANG
+    </button>
+</div>
 
     <audio id="alarm-finished" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
     <audio id="alarm-warning" src="https://actions.google.com/sounds/v1/alarms/digital_alarm_clock.ogg"></audio>
@@ -619,5 +629,46 @@ window.addEventListener('beforeinstallprompt', (e) => {
   // Anda bisa memicu munculnya tombol "Instal Aplikasi" di sini jika mau
   console.log('Aplikasi siap diinstal');
 });
+let deferredPrompt;
+const installContainer = document.getElementById('install-container');
+
+// 1. Tangkap event instalasi
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Mencegah Chrome memunculkan prompt otomatis
+    e.preventDefault();
+    // Simpan event agar bisa dipicu nanti
+    deferredPrompt = e;
+    // Munculkan tombol instal buatan kita
+    installContainer.style.display = 'block';
+});
+
+// 2. Fungsi saat tombol diklik
+function triggerInstall() {
+    if (deferredPrompt) {
+        // Munculkan pop-up asli Chrome
+        deferredPrompt.prompt();
+        // Cek jawaban pengguna
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User menginstal aplikasi');
+                installContainer.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+    }
+}
+
+// 3. Sembunyikan tombol jika aplikasi sudah terinstal
+window.addEventListener('appinstalled', () => {
+    installContainer.style.display = 'none';
+    deferredPrompt = null;
+    alert("Aplikasi berhasil terpasang!");
+});
+
+// 4. Pastikan Service Worker terdaftar (WAJIB)
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+}
+
 </body>
 </html>
