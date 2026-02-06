@@ -350,13 +350,19 @@ function canEditUnit() {
         (currentUser.role === 'admin' || currentUser.role === 'staff');
 }
 
-// ➕ TAMBAH UNIT
+// ➕ TAMBAH UNIT (AMAN)
 function addNewUnit() {
     if (!canEditUnit()) {
         alert("Tidak punya akses");
         return;
     }
 
+    const n = prompt("Nama Unit:");
+    if (n) {
+        unitNames.push(n);
+        saveAppState();
+    }
+}
     const n = prompt("Nama Unit:");
     if (n) {
         unitNames.push(n);
@@ -702,7 +708,7 @@ if (card) {
         function adjustTime(i, ms) { endTimes[i] += ms; saveAppState(); }
         function pause(i) { isPaused[i] = !isPaused[i]; saveAppState(); }
         function editUnitName(i) { const n = prompt("Nama baru:", unitNames[i]); if(n) { unitNames[i] = n; saveAppState(); } }
-        function addNewUnit() { const n = prompt("Nama Unit:"); if(n){ unitNames.push(n); saveAppState(); }}
+      
         function deleteUnit(i) { if(confirm("Hapus unit?")){ unitNames.splice(i, 1); saveAppState(); }}
         function clearAllLogs() { if(confirm("Hapus semua history?")) { logs = []; saveAppState(); }}
         function deleteLog(i) { logs.splice(i, 1); saveAppState(); }
