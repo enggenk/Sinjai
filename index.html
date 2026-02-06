@@ -97,9 +97,9 @@
             <span style="font-size:4rem">🏎️</span>
             <h1 style="margin: 0 0 20px 0; color: var(--primary);">YSA021 Sinjai</h1>
             <div id="loading-text">Menghubungkan ke Server...</div>
-<div id="login-form" style="display:none;">
-    <select id="user-input" style="background: white; width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #e2e8f0; border-radius: 15px; outline: none;">
-        <option value="" disabled selected>Memuat nama...</option>
+   <div id="login-form" style="display:none;">
+    <select id="user-input" style="background: white;">
+        <option value="" disabled selected>Pilih Nama Akun...</option>
     </select>
     
     <input type="password" id="pass-input" placeholder="Password">
@@ -283,74 +283,10 @@
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
 
-                        db.ref('app_data').on('value', (snapshot) => {
-            try {
-                const data = snapshot.val() || {};
-                
-                // Ambil data dasar
-                users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
-                unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
-                prices = data.prices || { "15": 10000, "30": 18000, "60": 35000 };
-                logs = data.logs || [];
-                queue = data.queue || [];
-                endTimes = data.endTimes || {};
-                startTimes = data.startTimes || {}; 
-                isPaused = data.isPaused || {};
-                isPaid = data.isPaid || {};
-                activeUsers = data.activeUsers || {};
-                activeDurations = data.activeDurations || {};
-                activeStaff = data.activeStaff || {};
-                activeTransferInfo = data.activeTransferInfo || {};
-
-                // --- LOGIKA DROPDOWN USER ---
-                const loginSelect = document.getElementById('user-input');
-                
-                // Cek apakah elemen dropdown ada di HTML
-                if (loginSelect && loginSelect.tagName === 'SELECT') {
-                    const currentVal = loginSelect.value; // Simpan pilihan saat ini jika ada
-                    loginSelect.innerHTML = '<option value="" disabled selected>Pilih Nama Akun...</option>';
-                    
-                    users.forEach(u => {
-                        const opt = document.createElement('option');
-                        opt.value = u.user;
-                        // Tampilkan Role di samping nama agar jelas
-                        opt.innerText = u.user.toUpperCase() + (u.role === 'admin' ? ' (Admin)' : ''); 
-                        loginSelect.appendChild(opt);
-                    });
-
-                    // Jika user sudah memilih, kembalikan pilihannya (agar tidak reset saat realtime update)
-                    if (currentVal && users.some(u => u.user === currentVal)) {
-                        loginSelect.value = currentVal;
-                    }
-                }
-                // -----------------------------
-
-                // Hilangkan Loading Screen
-                const loadingText = document.getElementById('loading-text');
-                const loginForm = document.getElementById('login-form');
-                
-                if(loadingText) loadingText.style.display = 'none';
-                if(loginForm) loginForm.style.display = 'block';
-
-                // Jika user sudah login sebelumnya (refresh halaman)
-                if (currentUser) {
-                    applyPermissions(); 
-                    initDashboard(); 
-                    renderQueue(); 
-                    renderLogs(); 
-                    renderUserList();
-                    
-                    // Update input harga admin jika elemen ada
-                    if(document.getElementById('p-15')) document.getElementById('p-15').value = prices[15] || 0;
-                    if(document.getElementById('p-30')) document.getElementById('p-30').value = prices[30] || 0;
-                    if(document.getElementById('p-60')) document.getElementById('p-60').value = prices[60] || 0;
-                }
-
-            } catch (error) {
-                console.error("Error memuat data:", error);
-                alert("Terjadi kesalahan script: " + error.message);
-            }
-        });
+                db.ref('app_data').on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
+            unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
             // ... (variabel lain tetap sama) ...
             activeTransferInfo = data.activeTransferInfo || {};
 
