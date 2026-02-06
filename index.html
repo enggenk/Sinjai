@@ -367,7 +367,11 @@ function attemptLogin() {
     }
 }
 
-// ➕ TAMBAH UNIT (AMAN)
+function canEditUnit() {
+    return currentUser &&
+        (currentUser.role === 'admin' || currentUser.role === 'staff');
+}
+
 function addNewUnit() {
     if (!canEditUnit()) {
         alert("Tidak punya akses");
@@ -380,6 +384,8 @@ function addNewUnit() {
         saveAppState();
     }
 }
+// ➕ TAMBAH UNIT (AMAN)
+
     const u = document.getElementById('user-input').value;
     const p = document.getElementById('pass-input').value;
     const userFound = users.find(x => x.user === u && x.pass === p);
