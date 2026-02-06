@@ -85,6 +85,25 @@
 
         @keyframes pulse-warning { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         @keyframes blink-border { 0% { border-color: var(--danger); } 50% { border-color: transparent; } 100% { border-color: var(--danger); } }
+    
+    /* 🎉 CONFETTI */
+.confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    opacity: 0.9;
+    animation: fall linear forwards;
+    z-index: 5000;
+    border-radius: 3px;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
     </style>
 </head>
 <body>
@@ -421,12 +440,19 @@ if (savedUser) {
                         warningPlayed[i] = true;
                     }
                 } else {
-                    clearInterval(timers[i]);
-                    const el = document.getElementById(`timer-${i}`);
-                    if(el) el.innerText = "00:00";
-                    document.getElementById(`card-${i}`).className = 'card expired';
-                    document.getElementById('alarm-finished').play();
-                }
+    clearInterval(timers[i]);
+
+    const el = document.getElementById(`timer-${i}`);
+    if (el) el.innerText = "00:00";
+
+    const card = document.getElementById(`card-${i}`);
+    if (card) card.className = 'card expired';
+
+    document.getElementById('alarm-finished').play();
+
+    // 🎉 CONFETTI !!!
+    launchConfetti(60);
+}
             }, 1000);
         }
 
@@ -706,6 +732,24 @@ if (savedUser) {
         console.log('PWA was installed');
     });
     
+function launchConfetti(count = 40) {
+    const colors = ['#ec4899', '#22d3ee', '#22c55e', '#fbbf24', '#a855f7'];
+
+    for (let i = 0; i < count; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+        document.body.appendChild(confetti);
+
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
 </script>
 </body>
 </html>
