@@ -497,7 +497,24 @@ if (savedUser) {
         function openStart(i) { 
             activeUnitIdx = i; tempDur = null; tempPay = null; 
             document.getElementById('modal-start').style.display = 'flex'; 
-            document.getElementById('dur-options').innerHTML = [15,30,60].map(d => `<button class="btn-main" style="background:white; color:var(--primary); border:1px solid #ddd;" onclick="setTempDur(${d}, this)">${d} Mnt</button>`).join(""); 
+            document.getElementById('dur-options').innerHTML =
+  [15,30,60].map(d => {
+    const price = prices[d] || 0;
+    return `
+      <button class="btn-main dur-btn"
+        style="background:white; color:var(--primary); border:1px solid #ddd; padding:12px 6px;"
+        onclick="setTempDur(${d}, this)">
+        
+        <div style="font-weight:800; font-size:0.9rem;">
+          ${d === 60 ? '1 Jam' : d + ' Mnt'}
+        </div>
+        <div style="font-size:0.7rem; color:var(--accent); margin-top:4px;">
+          Rp ${price.toLocaleString()}
+        </div>
+
+      </button>
+    `;
+  }).join("");
         }
         function setTempDur(d, btn) { tempDur = d; document.querySelectorAll('#dur-options button').forEach(b => b.style.borderColor = "#ddd"); btn.style.borderColor = "var(--accent)"; checkReady(); }
         function setTempPay(s) { tempPay = s; document.getElementById('opt-paid').style.background = s ? "var(--success)" : "#f1f5f9"; document.getElementById('opt-unpaid').style.background = !s ? "var(--danger)" : "#f1f5f9"; checkReady(); }
