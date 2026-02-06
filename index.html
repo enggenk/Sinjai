@@ -709,7 +709,6 @@ if (savedUser) {
         deferredPrompt = null;
         console.log('PWA was installed');
     });
-    <script>
 function speakExpired(unitName) {
     if (!('speechSynthesis' in window)) return;
 
@@ -725,7 +724,6 @@ function speakExpired(unitName) {
     window.speechSynthesis.cancel(); // hentikan suara lain
     window.speechSynthesis.speak(msg);
 }
-</script>
 </script>
 </body>
 </html>
