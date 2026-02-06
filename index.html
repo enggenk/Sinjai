@@ -206,6 +206,126 @@ body {
 .nav-item.active {
     color: var(--accent) !important;
 }
+/* ===============================
+   🔆 POPUP LEBIH TERANG & JELAS
+   (Mulai Sesi & Hentikan Unit)
+   =============================== */
+
+/* Overlay lebih terang */
+.modal-overlay {
+    background: rgba(15, 23, 42, 0.55) !important;
+    backdrop-filter: blur(6px);
+}
+
+/* Kotak popup */
+.modal-box {
+    background: linear-gradient(180deg, #ffffff, #f8fafc) !important;
+    color: #0f172a !important;
+    border-radius: 28px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+    border: 3px solid #6366f1;
+}
+
+/* Judul popup */
+.modal-box h2,
+.modal-box h3 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+/* Teks biasa */
+.modal-box p,
+.modal-box small,
+.modal-box div {
+    color: #334155;
+    font-weight: 600;
+}
+
+/* ===============================
+   ▶️ POPUP MULAI SESI
+   =============================== */
+
+/* Tombol durasi */
+#dur-options button {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 900;
+    border: 2px solid #c7d2fe !important;
+    border-radius: 16px;
+}
+
+#dur-options button:hover {
+    background: #e0e7ff !important;
+}
+
+/* Tombol terpilih */
+#dur-options button[style*="accent"] {
+    background: #6366f1 !important;
+    color: white !important;
+    border-color: #4338ca !important;
+}
+
+/* Status bayar */
+#opt-paid {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    font-weight: 900;
+}
+#opt-unpaid {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    font-weight: 900;
+}
+
+/* Tombol MULAI */
+#btn-confirm-start {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: white !important;
+    font-size: 1rem;
+    font-weight: 900;
+    box-shadow: 0 10px 25px rgba(34,197,94,0.5);
+}
+
+/* ===============================
+   ⛔ POPUP HENTIKAN / SELESAIKAN
+   =============================== */
+
+/* Pesan stop */
+#stop-msg {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #7c2d12;
+}
+
+/* Tombol UNIT KEMBALI */
+#check-return-section .btn-main {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    font-weight: 900;
+    font-size: 0.95rem;
+}
+
+/* Tagihan */
+#payment-status-display h2 {
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+/* Tombol SELESAI */
+#stop-final-btn-group .btn-main {
+    background: linear-gradient(135deg, #fb7185, #ef4444) !important;
+    font-weight: 900;
+    box-shadow: 0 10px 25px rgba(239,68,68,0.5);
+}
+
+/* Tombol batal */
+.modal-box button[onclick*="BATAL"],
+.modal-box button[onclick*="close"] {
+    color: #475569 !important;
+    font-weight: 700;
+}
+
     </style>
 </head>
 <body>
