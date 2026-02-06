@@ -85,247 +85,6 @@
 
         @keyframes pulse-warning { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         @keyframes blink-border { 0% { border-color: var(--danger); } 50% { border-color: transparent; } 100% { border-color: var(--danger); } }
-    
-    /* 🎉 CONFETTI */
-.confetti {
-    position: fixed;
-    top: -10px;
-    width: 10px;
-    height: 10px;
-    opacity: 0.9;
-    animation: fall linear forwards;
-    z-index: 5000;
-    border-radius: 3px;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(110vh) rotate(360deg);
-        opacity: 0;
-    }
-}
-/* ===============================
-   🌙 DARK MODE CERIA – NEON OVERRIDE
-   (TANPA MENGUBAH FITUR)
-   =============================== */
-
-:root {
-    --bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
-    --primary: #e5e7eb;
-    --accent: #7c7cff;
-    --success: #22c55e;
-    --warning: #facc15;
-    --danger: #fb7185;
-    --card-bg: rgba(30, 41, 59, 0.95);
-}
-
-body {
-    background: var(--bg) !important;
-    color: var(--primary) !important;
-}
-
-/* CARD DASAR */
-.card {
-    background: var(--card-bg) !important;
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.05);
-    transition: 0.3s ease;
-}
-.card:hover {
-    transform: translateY(-4px) scale(1.01);
-}
-
-/* UNIT AKTIF */
-.card.active-run {
-    background: linear-gradient(135deg, #052e16, #064e3b) !important;
-    border: 2px solid var(--success);
-    box-shadow: 0 0 25px rgba(34,197,94,0.6);
-}
-
-/* HAMPIR HABIS */
-.card.warning-near {
-    background: linear-gradient(135deg, #422006, #713f12) !important;
-    border: 2px solid var(--warning);
-}
-
-/* EXPIRED */
-.card.expired {
-    background: linear-gradient(135deg, #450a0a, #7f1d1d) !important;
-    border: 2px solid var(--danger);
-    animation: neon-blink 0.8s infinite;
-    box-shadow: 0 0 30px rgba(251,113,133,0.7);
-}
-
-@keyframes neon-blink {
-    0%   { box-shadow: 0 0 10px rgba(251,113,133,0.4); }
-    50%  { box-shadow: 0 0 35px rgba(251,113,133,0.9); }
-    100% { box-shadow: 0 0 10px rgba(251,113,133,0.4); }
-}
-
-/* TIMER */
-.timer-display {
-    color: #f8fafc !important;
-    text-shadow: 0 0 12px rgba(124,124,255,0.7);
-}
-
-.card.expired .timer-display {
-    color: var(--danger) !important;
-    text-shadow: 0 0 15px rgba(251,113,133,0.9);
-}
-
-/* BUTTON */
-.btn-main {
-    background: linear-gradient(135deg, #7c7cff, #6366f1) !important;
-    color: white !important;
-    box-shadow: 0 0 20px rgba(124,124,255,0.6);
-}
-.btn-main:hover {
-    transform: scale(1.06);
-    box-shadow: 0 0 30px rgba(124,124,255,0.9);
-}
-
-/* USER TAG */
-.user-tag {
-    background: linear-gradient(135deg, #312e81, #4338ca) !important;
-    color: #e0e7ff !important;
-}
-
-/* STAFF */
-.staff-badge {
-    color: #94a3b8 !important;
-}
-
-/* TASKBAR */
-.taskbar {
-    background: rgba(15, 23, 42, 0.85) !important;
-    backdrop-filter: blur(12px);
-}
-
-/* NAV ICON */
-.nav-item.active {
-    color: var(--accent) !important;
-}
-/* ===============================
-   🔆 POPUP LEBIH TERANG & JELAS
-   (Mulai Sesi & Hentikan Unit)
-   =============================== */
-
-/* Overlay lebih terang */
-.modal-overlay {
-    background: rgba(15, 23, 42, 0.55) !important;
-    backdrop-filter: blur(6px);
-}
-
-/* Kotak popup */
-.modal-box {
-    background: linear-gradient(180deg, #ffffff, #f8fafc) !important;
-    color: #0f172a !important;
-    border-radius: 28px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.35);
-    border: 3px solid #6366f1;
-}
-
-/* Judul popup */
-.modal-box h2,
-.modal-box h3 {
-    font-size: 1.6rem;
-    font-weight: 900;
-    color: #1e293b;
-    margin-bottom: 15px;
-}
-
-/* Teks biasa */
-.modal-box p,
-.modal-box small,
-.modal-box div {
-    color: #334155;
-    font-weight: 600;
-}
-
-/* ===============================
-   ▶️ POPUP MULAI SESI
-   =============================== */
-
-/* Tombol durasi */
-#dur-options button {
-    background: #f1f5f9 !important;
-    color: #0f172a !important;
-    font-weight: 900;
-    border: 2px solid #c7d2fe !important;
-    border-radius: 16px;
-}
-
-#dur-options button:hover {
-    background: #e0e7ff !important;
-}
-
-/* Tombol terpilih */
-#dur-options button[style*="accent"] {
-    background: #6366f1 !important;
-    color: white !important;
-    border-color: #4338ca !important;
-}
-
-/* Status bayar */
-#opt-paid {
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    font-weight: 900;
-}
-#opt-unpaid {
-    background: #fee2e2 !important;
-    color: #991b1b !important;
-    font-weight: 900;
-}
-
-/* Tombol MULAI */
-#btn-confirm-start {
-    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
-    color: white !important;
-    font-size: 1rem;
-    font-weight: 900;
-    box-shadow: 0 10px 25px rgba(34,197,94,0.5);
-}
-
-/* ===============================
-   ⛔ POPUP HENTIKAN / SELESAIKAN
-   =============================== */
-
-/* Pesan stop */
-#stop-msg {
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: #7c2d12;
-}
-
-/* Tombol UNIT KEMBALI */
-#check-return-section .btn-main {
-    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
-    font-weight: 900;
-    font-size: 0.95rem;
-}
-
-/* Tagihan */
-#payment-status-display h2 {
-    font-size: 1.5rem;
-    font-weight: 900;
-}
-
-/* Tombol SELESAI */
-#stop-final-btn-group .btn-main {
-    background: linear-gradient(135deg, #fb7185, #ef4444) !important;
-    font-weight: 900;
-    box-shadow: 0 10px 25px rgba(239,68,68,0.5);
-}
-
-/* Tombol batal */
-.modal-box button[onclick*="BATAL"],
-.modal-box button[onclick*="close"] {
-    color: #475569 !important;
-    font-weight: 700;
-}
-
     </style>
 </head>
 <body>
@@ -468,7 +227,7 @@ body {
         <div class="modal-box">
             <h2 id="stop-msg"></h2>
             <div id="check-return-section">
-                <button class="btn-main" style="background:var(--success)" onclick="showPaymentAction()">ADAMI</button>
+                <button class="btn-main" style="background:var(--success)" onclick="showPaymentAction()">UNIT KEMBALI</button>
                 <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>
             </div>
             <div id="payment-action-section" style="display:none; margin-top: 15px;">
@@ -505,7 +264,7 @@ body {
 </div>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
-    
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBgA52SX2Azpc-UrpPg4sPVNukT3GjSyUw",
@@ -519,57 +278,15 @@ body {
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let users = [], unitNames = [], unitNumbers = [], prices = {}, logs = [], queue = [];
-let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {},
-    activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
-let isExpired = {};
-let expiredVoiceTimers = {};
-let speechUnlocked = false;
-let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
-        function speakUnitExpired(i) {
-    if (!('speechSynthesis' in window)) return;
-    if (!unitNumbers[i]) return;
-
-    const msg = new SpeechSynthesisUtterance();
-    msg.lang = 'id-ID';
-    msg.rate = 0.95;
-    msg.pitch = 1;
-    msg.volume = 1;
-
-    msg.text = `Perhatian operator, unit nomor ${unitNumbers[i]} telah habis`;
-    window.speechSynthesis.speak(msg);
-}
-
-function startExpiredVoiceRepeat(i) {
-    stopExpiredVoiceRepeat(i);
-    expiredVoiceTimers[i] = setInterval(() => {
-        if (isExpired[i]) speakUnitExpired(i);
-    }, 10000);
-}
-
-function stopExpiredVoiceRepeat(i) {
-    if (expiredVoiceTimers[i]) {
-        clearInterval(expiredVoiceTimers[i]);
-        delete expiredVoiceTimers[i];
-    }
-}
-
-function unlockSpeech() {
-    if (speechUnlocked) return;
-    if (!('speechSynthesis' in window)) return;
-
-    const u = new SpeechSynthesisUtterance('');
-    u.lang = 'id-ID';
-    window.speechSynthesis.speak(u);
-    speechUnlocked = true;
-}
+        let users = [], unitNames = [], prices = {}, logs = [], queue = [];
+        let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
+        let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
 
         db.ref('app_data').on('value', (snapshot) => {
             const data = snapshot.val() || {};
             users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
             unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
-unitNumbers = data.unitNumbers || unitNames.map((_, i) => i + 1);
             prices = data.prices || { "15": 10000, "30": 18000, "60": 35000 };
             logs = data.logs || [];
             queue = data.queue || [];
@@ -581,7 +298,6 @@ unitNumbers = data.unitNumbers || unitNames.map((_, i) => i + 1);
             activeDurations = data.activeDurations || {};
             activeStaff = data.activeStaff || {};
             activeTransferInfo = data.activeTransferInfo || {};
-            isExpired = data.isExpired || {};
 
             document.getElementById('loading-text').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
@@ -613,13 +329,10 @@ if (savedUser) {
 
         function saveAppState() {
             db.ref('app_data').update({
-    users, units: unitNames, unitNumbers,
-    prices, logs, queue,
-    endTimes, startTimes, isPaused, isPaid,
-    activeUsers, activeDurations, activeStaff, activeTransferInfo,
-    isExpired
-});
-            
+                users, units: unitNames, prices, logs, queue,
+                endTimes, startTimes, isPaused, isPaid,
+                activeUsers, activeDurations, activeStaff, activeTransferInfo
+            });
         }
 
         function attemptLogin() {
@@ -662,88 +375,61 @@ if (savedUser) {
         }
 
         function initDashboard() {
-    const container = document.getElementById('unit-container');
-    container.innerHTML = "";
-    const isAdmin = currentUser && currentUser.role === 'admin';
+            const container = document.getElementById('unit-container'); 
+            container.innerHTML = "";
+            const isAdmin = currentUser && currentUser.role === 'admin';
 
-    unitNames.forEach((name, i) => {
-       const isActive = !!endTimes[i]; // ⬅️ SELAMA BELUM STOP, TETAP AKTIF
-        const expiredClass = isExpired[i] ? 'expired' : '';
-        const activeClass = isActive ? 'active-run' : '';
-
-        container.innerHTML += `
-        <div class="card ${activeClass} ${expiredClass}" id="card-${i}">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-weight:800">${name}</div>
-                <div style="display:flex; gap:8px;">
-                    ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--accent)">🔄</button>` : ''}
-                    <div style="display:${isAdmin ? 'flex' : 'none'}; gap:5px;">
-                        <button onclick="editUnitName(${i})">✏️</button>
-                        <button onclick="deleteUnit(${i})">🗑️</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="user-tag">${activeUsers[i] || ""}</div>
-            <div class="transfer-tag">${activeTransferInfo[i] ? "Pindahan dari " + activeTransferInfo[i] : ""}</div>
-
-            <div class="timer-display" id="timer-${i}">00:00</div>
-
-            <div id="ctrl-${i}">
-                ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">MULAI</button>`}
-            </div>
-
-            <div class="staff-badge">${activeStaff[i] ? "Oleh: " + activeStaff[i] : ""}</div>
-        </div>
-        `;
-
-        if (isActive) {
-    resumeTimer(i);
-    renderRunningCtrl(i);
-}
-    });
-}
-function resumeTimer(i) {
-    if (timers[i]) clearInterval(timers[i]);
-
-    timers[i] = setInterval(() => {
-        if (isPaused[i]) {
-            endTimes[i] += 1000;
-            return;
+            unitNames.forEach((name, i) => {
+                const isActive = (endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]));
+                container.innerHTML += `
+                    <div class="card ${isActive ? 'active-run' : ''}" id="card-${i}">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-weight:800">${name}</div>
+                            <div style="display:flex; gap:8px;">
+                                ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--accent); font-size:1rem; padding:0;">🔄</button>` : ''}
+                                <div style="display:${isAdmin ? 'flex' : 'none'}; gap:5px;">
+                                    <button onclick="editUnitName(${i})" style="background:none; color:var(--accent); padding:0;">✏️</button>
+                                    <button onclick="deleteUnit(${i})" style="background:none; color:var(--danger); padding:0;">🗑️</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-tag">${activeUsers[i] || ""}</div>
+                        <div class="transfer-tag">${activeTransferInfo[i] ? "Pindahan dari " + activeTransferInfo[i] : ""}</div>
+                        <div class="timer-display" id="timer-${i}">00:00</div>
+                        <div id="ctrl-${i}">
+                            ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">MULAI</button>`}
+                        </div>
+                        <div class="staff-badge">${activeStaff[i] ? "Oleh: " + activeStaff[i] : ""}</div>
+                    </div>`;
+                if(isActive) resumeTimer(i);
+            });
         }
 
-        const diff = endTimes[i] - Date.now();
-
-        if (diff > 0) {
-            const m = Math.floor(diff / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            const el = document.getElementById(`timer-${i}`);
-            if (el) el.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-
-            if (diff <= 60000 && !warningPlayed[i]) {
-                document.getElementById(`card-${i}`)?.classList.add('warning-near');
-                document.getElementById('alarm-warning')?.play();
-                warningPlayed[i] = true;
-            }
-        } else {
-            clearInterval(timers[i]);
-            isExpired[i] = true;
-            saveAppState();
-
-            const el = document.getElementById(`timer-${i}`);
-            if (el) el.innerText = "00:00";
-
-            document.getElementById('alarm-finished')?.play();
-
-            if (!expiredVoiceTimers[i] && !warningPlayed[i]) {
-    speakUnitExpired(i);
-    startExpiredVoiceRepeat(i);
-}
+        function resumeTimer(i) {
+            if(timers[i]) clearInterval(timers[i]);
+            renderRunningCtrl(i);
+            timers[i] = setInterval(() => {
+                if(isPaused[i]) { endTimes[i] += 1000; return; }
+                const diff = endTimes[i] - Date.now();
+                if(diff > 0) {
+                    let m = Math.floor(diff / 60000), s = Math.floor((diff % 60000) / 1000);
+                    const el = document.getElementById(`timer-${i}`);
+                    if(el) el.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                    if(diff <= 60000 && !warningPlayed[i]) {
+                        document.getElementById(`card-${i}`).classList.add('warning-near');
+                        document.getElementById('alarm-warning').play();
+                        warningPlayed[i] = true;
+                    }
+                } else {
+                    clearInterval(timers[i]);
+                    const el = document.getElementById(`timer-${i}`);
+                    if(el) el.innerText = "00:00";
+                    document.getElementById(`card-${i}`).className = 'card expired';
+                    document.getElementById('alarm-finished').play();
+                }
+            }, 1000);
         }
-    }, 1000);
-}
 
-          
         function renderRunningCtrl(i) {
             const ctrl = document.getElementById(`ctrl-${i}`);
             if(!ctrl) return;
@@ -753,9 +439,7 @@ function resumeTimer(i) {
                     <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, -60000)">-1</button>
                     <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, 60000)">+1</button>
                     <button style="background:var(--warning); color:white" onclick="pause(${i})">${isPaused[i]?'GO':'PAUSE'}</button>
-                    <button style="background:var(--danger); color:white" onclick="triggerStop(${i})">
-    ${isExpired[i] ? 'SELESAIKAN' : 'STOP'}
-</button>
+                    <button style="background:var(--danger); color:white" onclick="triggerStop(${i})">STOP</button>
                 </div>`;
         }
 
@@ -783,7 +467,6 @@ function resumeTimer(i) {
 
         function executeSwap(targetIdx) {
             const s = swapSourceIdx; const t = targetIdx;
-            stopExpiredVoiceRepeat(s);
             endTimes[t] = endTimes[s]; startTimes[t] = startTimes[s];
             isPaused[t] = isPaused[s]; isPaid[t] = isPaid[s];
             activeUsers[t] = activeUsers[s]; activeDurations[t] = activeDurations[s];
@@ -808,26 +491,16 @@ function resumeTimer(i) {
         
         function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeModal(); }
 
-        function startUnit(i, dur, paid, userName) {
-    unlockSpeech();
-    stopExpiredVoiceRepeat(i); // 🔥 RESET VOICE STATE
-    warningPlayed[i] = false; // ⬅️ PASTIKAN RESET
-
-    const now = Date.now();
-    startTimes[i] = now;
-    endTimes[i] = now + (dur * 60 * 1000);
-    isPaid[i] = paid;
-    isPaused[i] = false;
-    activeUsers[i] = userName || "";
-    activeDurations[i] = dur;
-    activeStaff[i] = currentUser.user;
-
-    delete activeTransferInfo[i];
-    delete isExpired[i];
-    warningPlayed[i] = false;
-
-    saveAppState();
-}
+        function startUnit(i, dur, paid, userName) { 
+            const now = Date.now();
+            startTimes[i] = now;
+            endTimes[i] = now + (dur * 60 * 1000); 
+            isPaid[i] = paid; isPaused[i] = false; activeUsers[i] = userName || ""; 
+            activeDurations[i] = dur; activeStaff[i] = currentUser.user; 
+            delete activeTransferInfo[i];
+            warningPlayed[i] = false; 
+            saveAppState();
+        }
 
         function triggerStop(i) { 
             stopIdx = i; 
@@ -848,25 +521,19 @@ function resumeTimer(i) {
                 <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>`; 
         }
 
-      function finalStop(i, markAsPaid) {
-    if (markAsPaid) isPaid[i] = true;
-
-    stopExpiredVoiceRepeat(i); // 🔇 WAJIB
-
-    clearInterval(timers[i]);
-    delete endTimes[i];
-    delete startTimes[i];
-    delete activeUsers[i];
-    delete activeDurations[i];
-    delete activeStaff[i];
-    delete isPaused[i];
-    delete isPaid[i];
-    delete activeTransferInfo[i];
-    delete isExpired[i];
-
-    saveAppState();
-    closeStopModal();
-}
+        function finalStop(i, markAsPaid) { 
+            if(markAsPaid) isPaid[i] = true; 
+            logs.unshift({ 
+                unit: unitNames[i], start: startTimes[i], end: Date.now(), 
+                dur: activeDurations[i], paid: isPaid[i], 
+                cost: prices[activeDurations[i]], staff: activeStaff[i] 
+            }); 
+            clearInterval(timers[i]); 
+            delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];
+            delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];
+            delete isPaid[i]; delete activeTransferInfo[i];
+            saveAppState(); closeStopModal(); 
+        }
 
         function addToQueue() { 
             const name = document.getElementById('q-name').value;
@@ -959,22 +626,8 @@ function resumeTimer(i) {
         function adjustTime(i, ms) { endTimes[i] += ms; saveAppState(); }
         function pause(i) { isPaused[i] = !isPaused[i]; saveAppState(); }
         function editUnitName(i) { const n = prompt("Nama baru:", unitNames[i]); if(n) { unitNames[i] = n; saveAppState(); } }
-        function addNewUnit() {
-    const n = prompt("Nama Unit:");
-    if (n) {
-        unitNames.push(n);
-        const maxNum = unitNumbers.length ? Math.max(...unitNumbers) : 0;
-        unitNumbers.push(maxNum + 1); // 🔥 NOMOR UNIK & STABIL
-        saveAppState();
-    }
-}
-        function deleteUnit(i) {
-    if (confirm("Hapus unit?")) {
-        unitNames.splice(i, 1);
-        unitNumbers.splice(i, 1);
-        saveAppState();
-    }
-}
+        function addNewUnit() { const n = prompt("Nama Unit:"); if(n){ unitNames.push(n); saveAppState(); }}
+        function deleteUnit(i) { if(confirm("Hapus unit?")){ unitNames.splice(i, 1); saveAppState(); }}
         function clearAllLogs() { if(confirm("Hapus semua history?")) { logs = []; saveAppState(); }}
         function deleteLog(i) { logs.splice(i, 1); saveAppState(); }
         function setReportFilter(t, b) { currentReportFilter = t; document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); renderLogs(); }
@@ -1053,25 +706,6 @@ function resumeTimer(i) {
         console.log('PWA was installed');
     });
     
-function launchConfetti(count = 40) {
-    const colors = ['#ec4899', '#22d3ee', '#22c55e', '#fbbf24', '#a855f7'];
-
-    for (let i = 0; i < count; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
-        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-
-        document.body.appendChild(confetti);
-
-        setTimeout(() => confetti.remove(), 4000);
-    }
-}
-
-
 </script>
 </body>
 </html>
