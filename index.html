@@ -523,6 +523,18 @@ body {
         let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
         let isExpired = {};
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
+        let speechUnlocked = false;
+
+function unlockSpeech() {
+    if (speechUnlocked) return;
+    if (!('speechSynthesis' in window)) return;
+
+    const u = new SpeechSynthesisUtterance('');
+    u.lang = 'id-ID';
+
+    window.speechSynthesis.speak(u);
+    speechUnlocked = true;
+}
         let expiredVoiceTimers = {}; 
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
 
@@ -773,6 +785,7 @@ function resumeTimer(i) {
         function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeModal(); }
 
         function startUnit(i, dur, paid, userName) { 
+          unlockSpeech();
             const now = Date.now();
             startTimes[i] = now;
             endTimes[i] = now + (dur * 60 * 1000); 
@@ -1022,6 +1035,14 @@ function launchConfetti(count = 40) {
         setTimeout(() => confetti.remove(), 4000);
     }
 }
+function getVisibleUnitNumber(cardIndex) {
+    const cards = Array.from(document.querySelectorAll('#unit-container .card'));
+    const cardEl = document.getElementById(`card-${cardIndex}`);
+    const visibleIndex = cards.indexOf(cardEl);
+
+    // fallback aman kalau DOM belum siap
+    return visibleIndex >= 0 ? visibleIndex + 1 : cardIndex + 1;
+}
 function speakUnitExpired(i) {
     if (!('speechSynthesis' in window)) return;
 
@@ -1054,6 +1075,7 @@ function stopExpiredVoiceRepeat(i) {
         delete expiredVoiceTimers[i];
     }
 }
+
 </script>
 </body>
 </html>
