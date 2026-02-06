@@ -697,7 +697,10 @@ if (savedUser) {
         </div>
         `;
 
-        if (isActive) resumeTimer(i);
+        if (isActive) {
+    resumeTimer(i);
+    renderRunningCtrl(i);
+}
     });
 }
 function resumeTimer(i) {
