@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YSA021 Sinjai</title>
+    
+    <link rel="icon" type="image/png" href="https://enggenk.github.io/Sinjai/logo-512.png">
+    <link rel="apple-touch-icon" href="https://enggenk.github.io/Sinjai/logo-512.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
         :root { 
             --bg: linear-gradient(135deg, #e0f2fe 0%, #fef2f2 100%); 
@@ -304,7 +310,6 @@
         }
 
         function applyPermissions() {
-            // Perbaikan: Elemen yang benar-benar sensitif disembunyikan, elemen kontrol di dashboard tetap ada
             const isAdmin = currentUser && currentUser.role === 'admin';
             document.querySelectorAll('.restrict-admin').forEach(el => { 
                 el.style.display = isAdmin ? 'block' : 'none'; 
