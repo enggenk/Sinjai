@@ -529,7 +529,22 @@ function initDashboard() {
 }
 
         function setTempDur(d, btn) { tempDur = d; document.querySelectorAll('#dur-options button').forEach(b => b.style.borderColor = "#ddd"); btn.style.borderColor = "var(--accent)"; checkReady(); }
-        function setTempPay(s) { tempPay = s; document.getElementById('opt-paid').style.background = s ? "var(--success)" : "#f1f5f9"; document.getElementById('opt-unpaid').style.background = !s ? "var(--danger)" : "#f1f5f9"; checkReady(); }
+        function setTempPay(s) {
+    tempPay = s;
+
+    // reset dulu (netral)
+    document.getElementById('opt-paid').style.background = "#f1f5f9";
+    document.getElementById('opt-unpaid').style.background = "#f1f5f9";
+
+    // baru warnai setelah diklik
+    if (s === true) {
+        document.getElementById('opt-paid').style.background = "var(--success)";
+    } else if (s === false) {
+        document.getElementById('opt-unpaid').style.background = "var(--danger)";
+    }
+
+    checkReady();
+}
         function checkReady() { 
     // PERBAIKAN: Cek kondisi dengan ketat. Jika belum lengkap, tombol MATI.
     if(tempDur && tempPay !== null) {
