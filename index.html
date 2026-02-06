@@ -566,11 +566,12 @@ if (savedUser) {
             document.getElementById('payment-status-display').innerHTML = isPaid[stopIdx] ? 
                 `<h2 style="color:var(--success)">LUNAS</h2>` : `<h2 style="color:var(--danger)">TAGIHAN: Rp ${cost.toLocaleString()}</h2>`; 
             document.getElementById('stop-final-btn-group').innerHTML = `
-                <button class="btn-main" style="background:var(--success)" onclick="finalStop(${stopIdx}, ${!isPaid[stopIdx]})">SELESAI</button> 
+                <button class="btn-main" style="background:var(--success)"
+    onclick="finalStop(${stopIdx})">SELESAI</button>
                 <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>`; 
         }
 
-        function finalStop(i, markAsPaid) { 
+        function finalStop(i) {
           // 🔓 Lepaskan posisi pin saat STOP
 const card = document.getElementById(`card-${i}`);
 if (card) {
@@ -581,18 +582,32 @@ if (card) {
     if (expiredUnits.size === 0) {
         stopVoiceLoop();
     }
-            if(markAsPaid) isPaid[i] = true; 
-            logs.unshift({ 
-                unit: unitNames[i], start: startTimes[i], end: Date.now(), 
-                dur: activeDurations[i], paid: isPaid[i], 
-                cost: prices[activeDurations[i]], staff: activeStaff[i] 
-            }); 
-            clearInterval(timers[i]); 
-            delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];
-            delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];
-            delete isPaid[i]; delete activeTransferInfo[i];
-            saveAppState(); closeStopModal(); 
-        }
+            if (!isPaid[i]) isPaid[i] = true;
+
+    logs.unshift({
+        unit: unitNames[i],
+        start: startTimes[i],
+        end: Date.now(),
+        dur: activeDurations[i],
+        paid: true,
+        cost: prices[activeDurations[i]] || 0,
+        staff: activeStaff[i]
+    });
+
+    clearInterval(timers[i]);
+
+    delete endTimes[i];
+    delete startTimes[i];
+    delete activeUsers[i];
+    delete activeDurations[i];
+    delete activeStaff[i];
+    delete isPaused[i];
+    delete isPaid[i];
+    delete activeTransferInfo[i];
+
+    saveAppState();
+    closeStopModal();
+}
 
         function addToQueue() { 
             const name = document.getElementById('q-name').value;
