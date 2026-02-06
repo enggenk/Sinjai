@@ -505,7 +505,8 @@ body {
 </div>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
-
+    
+let expiredVoiceTimers = {};
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBgA52SX2Azpc-UrpPg4sPVNukT3GjSyUw",
@@ -699,6 +700,8 @@ if (savedUser) {
 
             document.getElementById('alarm-finished').play();
             launchConfetti(60);
+            speakUnitExpired(i);
+startExpiredVoiceRepeat(i);
         }
     }, 1000);
 }
@@ -797,20 +800,36 @@ delete isExpired[i];
                 <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>`; 
         }
 
-        function finalStop(i, markAsPaid) { 
-            if(markAsPaid) isPaid[i] = true; 
-            logs.unshift({ 
-                unit: unitNames[i], start: startTimes[i], end: Date.now(), 
-                dur: activeDurations[i], paid: isPaid[i], 
-                cost: prices[activeDurations[i]], staff: activeStaff[i] 
-            }); 
-            clearInterval(timers[i]); 
-            delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];
-            delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];
-            delete isPaid[i]; delete activeTransferInfo[i];
-            delete isExpired[i];
-            saveAppState(); closeStopModal(); 
-        }
+      function finalStop(i, markAsPaid) {
+    if (markAsPaid) isPaid[i] = true;
+
+    logs.unshift({
+        unit: unitNames[i],
+        start: startTimes[i],
+        end: Date.now(),
+        dur: activeDurations[i],
+        paid: isPaid[i],
+        cost: prices[activeDurations[i]],
+        staff: activeStaff[i]
+    });
+
+    clearInterval(timers[i]);
+
+    stopExpiredVoiceRepeat(i); // 🔇 HENTIKAN SUARA ULANG
+
+    delete endTimes[i];
+    delete startTimes[i];
+    delete activeUsers[i];
+    delete activeDurations[i];
+    delete activeStaff[i];
+    delete isPaused[i];
+    delete isPaid[i];
+    delete activeTransferInfo[i];
+    delete isExpired[i];
+
+    saveAppState();
+    closeStopModal();
+}
 
         function addToQueue() { 
             const name = document.getElementById('q-name').value;
@@ -1000,7 +1019,36 @@ function launchConfetti(count = 40) {
         setTimeout(() => confetti.remove(), 4000);
     }
 }
+function speakUnitExpired(unitIndex) {
+    if (!('speechSynthesis' in window)) return;
 
+    const msg = new SpeechSynthesisUtterance();
+    msg.lang = 'id-ID';
+    msg.rate = 0.95;
+    msg.pitch = 1;
+    msg.volume = 1;
+
+    msg.text = `Perhatian, unit nomor ${unitIndex + 1} telah habis`;
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(msg);
+}
+function startExpiredVoiceRepeat(i) {
+    stopExpiredVoiceRepeat(i); // pastikan tidak dobel
+
+    expiredVoiceTimers[i] = setInterval(() => {
+        if (isExpired[i]) {
+            speakUnitExpired(i);
+        }
+    }, 30000); // 30 detik
+}
+
+function stopExpiredVoiceRepeat(i) {
+    if (expiredVoiceTimers[i]) {
+        clearInterval(expiredVoiceTimers[i]);
+        delete expiredVoiceTimers[i];
+    }
+}
 </script>
 </body>
 </html>
