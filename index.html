@@ -730,9 +730,9 @@ function speakExpired(unitName) {
     );
 
     msg.lang = 'id-ID';
-    msg.rate = 1;   // kecepatan bicara
-    msg.pitch = 3;    // nada suara
-    msg.volume = 3;   // volume
+    msg.rate = 2;   // kecepatan bicara
+    msg.pitch = 5;    // nada suara
+    msg.volume = 5;   // volume
 
     window.speechSynthesis.cancel(); // hentikan suara lain
     window.speechSynthesis.speak(msg);
@@ -755,7 +755,7 @@ function speakExpiredUnits() {
         return idx !== -1 && !isPaid[idx];
     });
 
-    let message = `Perhatian. Sesi ${unitText} telah habis.`;
+    let message = `nomor ${unitText} sudah habis mi ketua.`;
 
     if (unpaidUnits.length > 0) {
         const unpaidText =
@@ -763,7 +763,7 @@ function speakExpiredUnits() {
                 ? unpaidUnits[0]
                 : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);
 
-        message += ` ${unpaidText} belum melakukan pembayaran.`;
+        message += ` ${unpaidText} belum pi na bayar nah.`;
     }
 
     const utterance = new SpeechSynthesisUtterance(message);
