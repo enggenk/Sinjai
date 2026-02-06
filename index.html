@@ -299,6 +299,7 @@
 
         let users = [], unitNames = [], prices = {}, logs = [], queue = [];
         let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};
+        let isExpired = {};
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
 
@@ -317,6 +318,7 @@
             activeDurations = data.activeDurations || {};
             activeStaff = data.activeStaff || {};
             activeTransferInfo = data.activeTransferInfo || {};
+            isExpired = data.isExpired || {};
 
             document.getElementById('loading-text').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
@@ -350,7 +352,9 @@ if (savedUser) {
             db.ref('app_data').update({
                 users, units: unitNames, prices, logs, queue,
                 endTimes, startTimes, isPaused, isPaid,
-                activeUsers, activeDurations, activeStaff, activeTransferInfo
+                activeUsers, activeDurations, activeStaff, activeTransferInfo,
+                isExpired
+                
             });
         }
 
@@ -399,9 +403,15 @@ if (savedUser) {
             const isAdmin = currentUser && currentUser.role === 'admin';
 
             unitNames.forEach((name, i) => {
-                const isActive = (endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]));
-                container.innerHTML += `
-                    <div class="card ${isActive ? 'active-run' : ''}" id="card-${i}">
+    const isActive = (endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]));
+    const expiredClass = isExpired[i] ? 'expired' : '';
+    const activeClass = isActive ? 'active-run' : '';
+
+    container.innerHTML += `
+        <div class="card ${activeClass} ${expiredClass}" id="card-${i}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:800">${name}</div>
+                ...
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div style="font-weight:800">${name}</div>
                             <div style="display:flex; gap:8px;">
@@ -439,18 +449,20 @@ if (savedUser) {
                         document.getElementById('alarm-warning').play();
                         warningPlayed[i] = true;
                     }
-                } else {
+else {
     clearInterval(timers[i]);
+
+    // 🔥 SIMPAN STATUS EXPIRED (TAHAN RELOAD)
+    isExpired[i] = true;
+    saveAppState();
 
     const el = document.getElementById(`timer-${i}`);
     if (el) el.innerText = "00:00";
 
     const card = document.getElementById(`card-${i}`);
-    if (card) card.className = 'card expired';
+    if (card) card.classList.add('expired');
 
     document.getElementById('alarm-finished').play();
-
-    // 🎉 CONFETTI !!!
     launchConfetti(60);
 }
             }, 1000);
@@ -558,6 +570,7 @@ if (savedUser) {
             delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];
             delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];
             delete isPaid[i]; delete activeTransferInfo[i];
+            delete isExpired[i];
             saveAppState(); closeStopModal(); 
         }
 
