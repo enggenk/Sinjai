@@ -380,12 +380,6 @@ function addNewUnit() {
         saveAppState();
     }
 }
-    const n = prompt("Nama Unit:");
-    if (n) {
-        unitNames.push(n);
-        saveAppState();
-    }
-}
     const u = document.getElementById('user-input').value;
     const p = document.getElementById('pass-input').value;
     const userFound = users.find(x => x.user === u && x.pass === p);
