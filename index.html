@@ -85,6 +85,10 @@
 
         @keyframes pulse-warning { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         @keyframes blink-border { 0% { border-color: var(--danger); } 50% { border-color: transparent; } 100% { border-color: var(--danger); } }
+   /* 🔝 Kartu dipertahankan di posisi paling atas */
+.card.pin-top {
+    order: 0 !important;
+}
     </style>
 </head>
 <body>
@@ -426,6 +430,8 @@ if (savedUser) {
     clearInterval(timers[i]);
     const el = document.getElementById(`timer-${i}`);
     if(el) el.innerText = "00:00";
+   const card = document.getElementById(`card-${i}`);
+    card.className = 'card expired pin-top'; // 🔒 PIN DI ATAS
 
     document.getElementById(`card-${i}`).className = 'card expired';
     document.getElementById('alarm-finished').play();
@@ -532,6 +538,11 @@ if (savedUser) {
         }
 
         function finalStop(i, markAsPaid) { 
+          // 🔓 Lepaskan posisi pin saat STOP
+const card = document.getElementById(`card-${i}`);
+if (card) {
+    card.classList.remove('pin-top');
+}
 // 🔇 HENTIKAN VOICE SAAT STOP DITEKAN (PALING AMAN)
     expiredUnits.delete(unitNames[i]);
     if (expiredUnits.size === 0) {
@@ -773,12 +784,12 @@ function speakExpiredUnits() {
                 : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);
 
         const alertMsg = new SpeechSynthesisUtterance(
-            `${unpaidText} itu belumpi dibayar ketua.`
+            `${unpaidText} itu belumpi dibayar, ketua.`
         );
         alertMsg.lang = 'id-ID';
         alertMsg.rate = 1,5;   // lebih cepat
-        alertMsg.pitch = 2;   // lebih berat
-        alertMsg.volume = 3;  // 🔥 LEBIH KERAS
+        alertMsg.pitch = 1,5;   // lebih berat
+        alertMsg.volume = 2;  // 🔥 LEBIH KERAS
 
         // kasih jeda dikit setelah voice pertama
         setTimeout(() => {
