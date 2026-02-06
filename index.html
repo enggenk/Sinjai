@@ -1037,10 +1037,19 @@ function launchConfetti(count = 40) {
 }
 function getVisibleUnitNumber(cardIndex) {
     const cards = Array.from(document.querySelectorAll('#unit-container .card'));
-    const cardEl = document.getElementById(`card-${cardIndex}`);
-    const visibleIndex = cards.indexOf(cardEl);
 
-    // fallback aman kalau DOM belum siap
+    // Urutkan sesuai order CSS + posisi DOM
+    const sorted = cards
+        .map((el, idx) => ({
+            el,
+            order: parseInt(getComputedStyle(el).order) || 0,
+            domIndex: idx
+        }))
+        .sort((a, b) => a.order - b.order || a.domIndex - b.domIndex);
+
+    const cardEl = document.getElementById(`card-${cardIndex}`);
+    const visibleIndex = sorted.findIndex(x => x.el === cardEl);
+
     return visibleIndex >= 0 ? visibleIndex + 1 : cardIndex + 1;
 }
 function speakUnitExpired(i) {
