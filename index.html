@@ -344,6 +344,25 @@ if (savedUser) {
         }
 
         function attemptLogin() {
+          // 🔐 CEK IZIN KELOLA UNIT
+function canEditUnit() {
+    return currentUser &&
+        (currentUser.role === 'admin' || currentUser.role === 'staff');
+}
+
+// ➕ TAMBAH UNIT
+function addNewUnit() {
+    if (!canEditUnit()) {
+        alert("Tidak punya akses");
+        return;
+    }
+
+    const n = prompt("Nama Unit:");
+    if (n) {
+        unitNames.push(n);
+        saveAppState();
+    }
+}
     const u = document.getElementById('user-input').value;
     const p = document.getElementById('pass-input').value;
     const userFound = users.find(x => x.user === u && x.pass === p);
@@ -393,10 +412,12 @@ if (savedUser) {
         }
 
         function initDashboard() {
-            const container = document.getElementById('unit-container'); 
-            container.innerHTML = "";
-            const isAdmin = currentUser && currentUser.role === 'admin';
+    const container = document.getElementById('unit-container'); 
+    container.innerHTML = "";
 
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const canManageUnit = currentUser &&
+        (currentUser.role === 'admin' || currentUser.role === 'staff');
             unitNames.forEach((name, i) => {
                 const isActive = !!endTimes[i];
                 container.innerHTML += `
