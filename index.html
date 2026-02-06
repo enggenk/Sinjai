@@ -733,37 +733,7 @@ if (savedUser) {
 
     return `unit ${spoken}`;
 }
-function speakExpired(unitName) {
-    if (!('speechSynthesis' in window)) return;
 
-    const msg = new SpeechSynthesisUtterance(
-        `nomor ${unitName}. sudah habis mi ketua.`
-    );
-
-    msg.lang = 'id-ID';
-    msg.rate = 2;   // kecepatan bicara
-    msg.pitch = 5;    // nada suara
-    msg.volume = 5;   // volume
-
-    window.speechSynthesis.cancel(); // hentikan suara lain
-    window.speechSynthesis.speak(msg);
-}function speakExpired(unitName) {
-    if (!('speechSynthesis' in window)) return;
-
-    const safeUnit = readUnitName(unitName);
-
-    const msg = new SpeechSynthesisUtterance(
-        `${safeUnit} sudah habis mi ketua`
-    );
-
-    msg.lang = 'id-ID';
-    msg.rate = 2;
-    msg.pitch = 5;
-    msg.volume = 5;
-
-    speechSynthesis.cancel();
-    speechSynthesis.speak(msg);
-}
 function speakExpiredUnits() {
     if (!('speechSynthesis' in window)) return;
     if (expiredUnits.size === 0) return;
@@ -790,13 +760,14 @@ function speakExpiredUnits() {
                 ? unpaidUnits[0]
                 : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);
 
-        message += ` nomor ${unpaidText} belumpi  membayar nah.`;
+        message += ` nomor ${unpaidText} belumpi  membayar, nahh!.`;
     }
 
     const utterance = new SpeechSynthesisUtterance(message);
     utterance.lang = 'id-ID';
-    utterance.rate = 0.95;
-    utterance.volume = 1;
+    utterance.rate = 2;
+    utterance.pitch = 5;
+    utterance.volume = 5;
 
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
