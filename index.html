@@ -1022,7 +1022,7 @@ function launchConfetti(count = 40) {
         setTimeout(() => confetti.remove(), 4000);
     }
 }
-function speakUnitExpired(unitIndex) {
+function speakUnitExpired(i) {
     if (!('speechSynthesis' in window)) return;
 
     const msg = new SpeechSynthesisUtterance();
@@ -1031,7 +1031,10 @@ function speakUnitExpired(unitIndex) {
     msg.pitch = 1;
     msg.volume = 1;
 
-    msg.text = `unit nomor ${unitIndex + 1} habis mi ketua`;
+    // 🔥 PAKSA NOMOR DARI INDEX KARTU
+    const nomorUnit = i + 1;
+
+    msg.text = `nomor ${nomorUnit} sudah habis mi ketua`;
 
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(msg);
