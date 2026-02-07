@@ -827,21 +827,18 @@ function closeStopModal() {
         deferredPrompt = null;
         console.log('PWA was installed');
     });
-    function readUnitName(unitName) {
-    // Ambil hanya angka
+    
+    
+    // 1. Fungsi untuk mengubah "Unit 1" menjadi "Unit Satu" agar natural
+function readUnitName(unitName) {
     const num = unitName.replace(/\D/g, '');
     if (!num) return unitName;
-
-    // Baca per digit → "1" jadi "satu"
     const digitMap = ['nol','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan'];
     const spoken = num.split('').map(d => digitMap[d]).join(' ');
-
     return `unit ${spoken}`;
 }
 
-function speakExpiredUnits() {
-    if (!('speechSynthesis' in window)) return;
-    if (expiredUnits.size === 0) return;
+
 function startVoiceLoop() {
     if (voiceInterval) return;
 
@@ -860,13 +857,17 @@ function stopVoiceLoop() {
     expiredUnits.clear();
     speechSynthesis.cancel(); // 🔇 pastikan benar-benar senyap
 }
+
+function speakExpiredUnits() {
+    if (!('speechSynthesis' in window)) return;
+    if (expiredUnits.size === 0) return;
+
     // 🔹 Unit expired (dibaca per digit)
     const units = Array.from(expiredUnits).map(u => readUnitName(u));
     const unitText =
         units.length === 1
             ? units[0]
             : units.slice(0, -1).join(', ') + ' dan ' + units.slice(-1);
-
     // 🔹 Unit yang BELUM BAYAR
     const unpaidUnits = Array.from(expiredUnits)
         .map(u => ({ raw: u, spoken: readUnitName(u) }))
