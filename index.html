@@ -593,44 +593,44 @@ function initDashboard() {
                 <button class="btn-main" style="background:var(--success)" onclick="finalStop(${stopIdx}, ${!isPaid[stopIdx]})">SUDAH BAYAR MI</button> 
                 <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>`; 
         }
-function finalStop(i, markAsPaid) { 
-    // 🔓 Lepaskan posisi pin saat STOP
-    const card = document.getElementById(`card-${i}`);
-    if (card) {
-        card.classList.remove('pin-top');
-        card.classList.remove('expired'); // Hapus class expired agar tidak kedap-kedip
-    }
+function finalStop(i, markAsPaid) {
 
-    // 🔇 1. HENTIKAN SUARA SEGERA
-    // Kita hapus unit ini dari daftar antrian suara
-    expiredUnits.delete(unitNames[i]);
-    
-    // Paksa sistem menghentikan pembicaraan yang sedang berlangsung
-    window.speechSynthesis.cancel();
+    // 🔇 HENTIKAN VOICE LANGSUNG
+    expiredUnits.delete(unitNames[i]);   // hapus unit ini
+    speechSynthesis.cancel();            // paksa hentikan suara yg sedang jalan
 
-    // 2. CEK SISA UNIT
+    // 🔕 Jika sudah tidak ada unit expired → stop loop total
     if (expiredUnits.size === 0) {
-        // Jika tidak ada lagi unit yang expired, matikan loop interval
         stopVoiceLoop();
-    } else {
-        // Jika MASIH ada unit lain yang expired, panggil ulang suaranya 
-        // agar daftar unit yang disebut langsung terupdate tanpa unit yang baru saja di-stop
-        speakExpiredUnits();
     }
 
-    // --- Sisa logika asli Anda ---
-    if(markAsPaid) isPaid[i] = true; 
-    logs.unshift({ 
-        unit: unitNames[i], start: startTimes[i], end: Date.now(), 
-        dur: activeDurations[i], paid: isPaid[i], 
-        cost: prices[activeDurations[i]], staff: activeStaff[i] 
-    }); 
-    clearInterval(timers[i]); 
-    delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];
-    delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];
-    delete isPaid[i]; delete activeTransferInfo[i];
-    saveAppState(); closeStopModal(); 
+    // ---- logika stop lama tetap ----
+    if (markAsPaid) isPaid[i] = true;
+
+    logs.unshift({
+        unit: unitNames[i],
+        start: startTimes[i],
+        end: Date.now(),
+        dur: activeDurations[i],
+        paid: isPaid[i],
+        cost: prices[activeDurations[i]],
+        staff: activeStaff[i]
+    });
+
+    clearInterval(timers[i]);
+    delete endTimes[i];
+    delete startTimes[i];
+    delete activeUsers[i];
+    delete activeDurations[i];
+    delete activeStaff[i];
+    delete isPaused[i];
+    delete isPaid[i];
+    delete activeTransferInfo[i];
+
+    saveAppState();
+    closeStopModal();
 }
+
 function closeStopModal() { 
     document.getElementById('modal-stop-confirm').style.display = 'none'; 
 }
@@ -842,7 +842,24 @@ function closeStopModal() {
 function speakExpiredUnits() {
     if (!('speechSynthesis' in window)) return;
     if (expiredUnits.size === 0) return;
+function startVoiceLoop() {
+    if (voiceInterval) return;
 
+    speakExpiredUnits(); // langsung bicara pertama kali
+
+    voiceInterval = setInterval(() => {
+        speakExpiredUnits();
+    }, 20000);
+}
+function stopVoiceLoop() {
+    if (voiceInterval) {
+        clearInterval(voiceInterval);
+        voiceInterval = null;
+    }
+
+    expiredUnits.clear();
+    speechSynthesis.cancel(); // 🔇 pastikan benar-benar senyap
+}
     // 🔹 Unit expired (dibaca per digit)
     const units = Array.from(expiredUnits).map(u => readUnitName(u));
     const unitText =
@@ -893,22 +910,7 @@ function speakExpiredUnits() {
         }, 600);
     }
 }
-function startVoiceLoop() {
-    if (voiceInterval) return;
 
-    speakExpiredUnits(); // langsung bicara pertama kali
-
-    voiceInterval = setInterval(() => {
-        speakExpiredUnits();
-    }, 20000);
-}
-
-function stopVoiceLoop() {
-    clearInterval(voiceInterval);
-    voiceInterval = null;
-    expiredUnits.clear();
-    speechSynthesis.cancel();
-}
 </script>
 </body>
 </html>
