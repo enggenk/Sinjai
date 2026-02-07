@@ -504,25 +504,26 @@ function initDashboard() {
     tempDur = null; 
     tempPay = null; 
     
-    // PERBAIKAN: Reset tombol jadi disabled (mati) saat modal dibuka
-    document.getElementById('btn-confirm-start').disabled = true; 
+    // Reset warna dan teks tombol ke kondisi netral (#f1f5f9)
+    const btnPaid = document.getElementById('opt-paid');
+    const btnUnpaid = document.getElementById('opt-unpaid');
     
+    btnPaid.style.background = "#f1f5f9";
+    btnPaid.style.color = "#333";
+    btnUnpaid.style.background = "#f1f5f9";
+    btnUnpaid.style.color = "#333";
+    
+    document.getElementById('btn-confirm-start').disabled = true; 
     document.getElementById('modal-start').style.display = 'flex'; 
-    document.getElementById('dur-options').innerHTML =
-    [15,30,60].map(d => {
+    
+    document.getElementById('dur-options').innerHTML = [15,30,60].map(d => {
         const price = prices[d] || 0;
         return `
         <button class="btn-main dur-btn"
             style="background:white; color:var(--primary); border:1px solid #ddd; padding:12px 6px;"
             onclick="setTempDur(${d}, this)">
-            
-            <div style="font-weight:800; font-size:0.9rem;">
-            ${d === 60 ? '1 Jam' : d + ' Mnt'}
-            </div>
-            <div style="font-size:0.7rem; color:var(--accent); margin-top:4px;">
-            Rp ${price.toLocaleString()}
-            </div>
-
+            <div style="font-weight:800; font-size:0.9rem;">${d === 60 ? '1 Jam' : d + ' Mnt'}</div>
+            <div style="font-size:0.7rem; color:var(--accent); margin-top:4px;">Rp ${price.toLocaleString()}</div>
         </button>
         `;
     }).join("");
@@ -531,20 +532,26 @@ function initDashboard() {
         function setTempDur(d, btn) { tempDur = d; document.querySelectorAll('#dur-options button').forEach(b => b.style.borderColor = "#ddd"); btn.style.borderColor = "var(--accent)"; checkReady(); }
         function setTempPay(s) {
     tempPay = s;
+    const btnPaid = document.getElementById('opt-paid');
+    const btnUnpaid = document.getElementById('opt-unpaid');
 
-    // reset dulu (netral)
-    document.getElementById('opt-paid').style.background = "#f1f5f9";
-    document.getElementById('opt-unpaid').style.background = "#f1f5f9";
+    // Kembalikan keduanya ke netral dulu
+    btnPaid.style.background = "#f1f5f9";
+    btnPaid.style.color = "#333";
+    btnUnpaid.style.background = "#f1f5f9";
+    btnUnpaid.style.color = "#333";
 
-    // baru warnai setelah diklik
+    // Beri warna hanya pada yang dipilih
     if (s === true) {
-        document.getElementById('opt-paid').style.background = "var(--success)";
+        btnPaid.style.background = "var(--success)";
+        btnPaid.style.color = "white";
     } else if (s === false) {
-        document.getElementById('opt-unpaid').style.background = "var(--danger)";
+        btnUnpaid.style.background = "var(--danger)";
+        btnUnpaid.style.color = "white";
     }
-
     checkReady();
 }
+
         function checkReady() { 
     // PERBAIKAN: Cek kondisi dengan ketat. Jika belum lengkap, tombol MATI.
     if(tempDur && tempPay !== null) {
@@ -624,7 +631,9 @@ function finalStop(i, markAsPaid) {
     delete isPaid[i]; delete activeTransferInfo[i];
     saveAppState(); closeStopModal(); 
 }
-
+function closeStopModal() { 
+    document.getElementById('modal-stop-confirm').style.display = 'none'; 
+}
 
         function addToQueue() { 
             const name = document.getElementById('q-name').value;
@@ -725,8 +734,15 @@ function finalStop(i, markAsPaid) {
             saveAppState(); alert("Harga Diperbarui!");
         }
 
-        function closeModal() { document.getElementById('modal-start').style.display = 'none'; }
-        function closeStopModal() { document.getElementById('modal-stop-confirm').style.display = 'none'; }
+        function closeModal() { 
+    document.getElementById('modal-start').style.display = 'none'; 
+    // Reset warna dan teks saat ditutup
+    document.getElementById('opt-paid').style.background = "#f1f5f9";
+    document.getElementById('opt-paid').style.color = "#333";
+    document.getElementById('opt-unpaid').style.background = "#f1f5f9";
+    document.getElementById('opt-unpaid').style.color = "#333";
+}
+
         function closeQModal() { document.getElementById('modal-q-select').style.display = 'none'; }
         function checkQueueReady() { const n = document.getElementById('q-name').value, d = document.getElementById('q-dur').value, p = document.getElementById('q-pay-init').value; document.getElementById('btn-add-queue').disabled = !(n && d && p); }
         function adjustTime(i, ms) { endTimes[i] += ms; saveAppState(); }
@@ -867,8 +883,8 @@ function speakExpiredUnits() {
             `${unpaidText} belumpi dibayar, ketua.`
         );
         alertMsg.lang = 'id-ID';
-        alertMsg.rate = 1,5;   // lebih cepat
-        alertMsg.pitch = 1,5;   // lebih berat
+        alertMsg.rate = 1.5;   // lebih cepat
+        alertMsg.pitch = 1.5;   // lebih berat
         alertMsg.volume = 2;  // 🔥 LEBIH KERAS
 
         // kasih jeda dikit setelah voice pertama
