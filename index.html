@@ -516,7 +516,7 @@ function initDashboard() {
     document.getElementById('btn-confirm-start').disabled = true; 
     document.getElementById('modal-start').style.display = 'flex'; 
     
-    document.getElementById('dur-options').innerHTML = [15,30,60].map(d => {
+    document.getElementById('dur-options').innerHTML = [20,40,60].map(d => {
         const price = prices[d] || 0;
         return `
         <button class="btn-main dur-btn"
