@@ -130,7 +130,7 @@
                 <div style="display: flex; gap: 10px;">
                     <select id="q-dur" onchange="checkQueueReady()">
                         <option value="" disabled selected>Durasi</option>
-                        <option value="15">15 Mnt</option><option value="30">30 Mnt</option><option value="60">1 Jam</option>
+                        <option value="20">20 Mnt</option><option value="40">40 Mnt</option><option value="60">1 Jam</option>
                     </select>
                     <select id="q-pay-init" onchange="checkQueueReady()">
                         <option value="" disabled selected>Bayar?</option>
@@ -189,8 +189,8 @@
             </div>
             <div class="admin-card restrict-admin">
                 <h3>💰 Atur Harga</h3>
-                <label>15 Mnt:</label><input type="number" id="p-15">
-                <label>30 Mnt:</label><input type="number" id="p-30">
+                <label>20 Mnt:</label><input type="number" id="p-20">
+                <label>40 Mnt:</label><input type="number" id="p-40">
                 <label>1 Jam:</label><input type="number" id="p-60">
                 <button onclick="savePrices()" class="btn-main" style="background:var(--success); margin-top:10px">UPDATE HARGA</button>
             </div>
@@ -246,7 +246,7 @@
             <h3 id="swap-unit-title">Tukar Unit</h3>
             <p>Pilih unit tujuan (harus kosong):</p>
             <div id="swap-unit-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-            <button onclick="closeSwapModal()" style="background:none; color:#94a3b8; margin-top:15px; width:100%">Batal</button>
+            <button onclick="closeSwapModal()" style="background:none; color:#94a3b8; margin-top:px; width:100%">Batal</button>
         </div>
     </div>
 
@@ -293,7 +293,7 @@ let voiceInterval = null;        // interval voice global
             const data = snapshot.val() || {};
             users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
             unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
-            prices = data.prices || { "15": 10000, "30": 18000, "60": 35000 };
+            prices = data.prices || { "20": 10000, "40": 18000, "60": 35000 };
             logs = data.logs || [];
             queue = data.queue || [];
             endTimes = data.endTimes || {};
@@ -727,10 +727,10 @@ function closeStopModal() {
         }
 
         function savePrices() {
-            const p15 = parseInt(document.getElementById('p-15').value);
-            const p30 = parseInt(document.getElementById('p-30').value);
+            const p20 = parseInt(document.getElementById('p-20').value);
+            const p40 = parseInt(document.getElementById('p-40').value);
             const p60 = parseInt(document.getElementById('p-60').value);
-            prices = { 15: p15, 30: p30, 60: p60 };
+            prices = { 20: p20, 40: p40, 60: p60 };
             saveAppState(); alert("Harga Diperbarui!");
         }
 
