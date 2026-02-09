@@ -1609,26 +1609,62 @@ function showDateDetails(logList, dateTitle, totalAmount) {
     const title = document.getElementById('detail-date-title');
     const totalDisplay = document.getElementById('detail-total-amount');
 
-    // Set Judul Tanggal
+    const isAdmin = currentUser && currentUser.role === 'admin';
+
     title.innerText = "📅 " + dateTitle;
-    
-    // Set Total Uang di Modal
     totalDisplay.innerText = "Rp " + totalAmount.toLocaleString();
     
-    // Isi Tabel Detail
-    tbody.innerHTML = logList.map(l => `
+    tbody.innerHTML = logList.map(l => {
+        // Mencari index asli di array logs global
+        const originalIndex = logs.findIndex(originalLog => 
+            originalLog.start === l.start && originalLog.unit === l.unit
+        );
+
+        return `
         <tr>
             <td style="font-weight:bold">${l.unit}</td>
             <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
             <td>${l.dur} mnt</td>
-            <td>${parseInt(l.cost || 0).toLocaleString()}</td>
-            <td style="font-style:italic; font-size:0.7rem">${l.staff || '-'}</td>
-        </tr>
-    `).join("");
+            <td style="font-weight:bold; color:var(--success)">${parseInt(l.cost || 0).toLocaleString()}</td>
+            <td>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                    <span style="font-size:0.75rem; color:var(--text-dim)">${l.staff || 'Sistem'}</span>
+                    ${isAdmin ? 
+                        `<button onclick="deleteDetailLog(${originalIndex})" 
+                                 style="background:rgba(239, 68, 68, 0.1); border:none; color:var(--danger); 
+                                 cursor:pointer; font-size:1rem; padding:2px 8px; border-radius:4px;">
+                            🗑️ Hapus
+                         </button>` 
+                        : ''
+                    }
+                </div>
+            </td>
+        </tr>`;
+    }).join("");
 
-    // Tampilkan Modal
     modal.style.display = 'flex';
 }
+
+function deleteDetailLog(index) {
+    if (index === -1) return;
+    
+    if (confirm("Apakah Anda yakin ingin menghapus data penyewaan ini?")) {
+        // 1. Hapus data dari array logs utama
+        logs.splice(index, 1);
+        
+        // 2. Simpan perubahan ke Firebase/LocalStorage
+        saveAppState();
+        
+        // 3. Tutup modal detail (karena data sudah berubah)
+        closeDetailModal();
+        
+        // 4. Refresh tampilan laporan utama
+        renderLogs();
+        
+        alert("Data berhasil dihapus.");
+    }
+}
+
 
 function closeDetailModal() {
     document.getElementById('modal-log-detail').style.display = 'none';
