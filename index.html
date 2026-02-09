@@ -1211,35 +1211,99 @@ switchView('units', document.querySelectorAll('.nav-item')[0]);
 
 }
 
-function renderLogs() {  
-        const now = new Date();  
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();  
-        const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);  
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();  
-        const isAdmin = currentUser && currentUser.role === 'admin';  
-          
-        let filtered = logs.filter(l => {  
-            if (currentReportFilter === 'daily') return l.end >= startOfDay;  
-            if (currentReportFilter === 'weekly') return l.end >= startOfWeek;  
-            if (currentReportFilter === 'monthly') return l.end >= startOfMonth;  
-            return true;  
-        });  
+function renderLogs() {
+    const now = new Date();
+    // Reset jam ke 00:00:00 untuk perbandingan tanggal yang akurat
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    
+    // Hitung batas waktu mundur
+    const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000); // Minggu ini (mulai hari Minggu)
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime(); // Tanggal 1 bulan ini
 
-        document.getElementById('income-label').innerText = `Total Pendapatan (${currentReportFilter.toUpperCase()})`;  
-        const total = filtered.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);  
-        document.getElementById('total-income').innerText = "Rp " + total.toLocaleString();  
-        document.getElementById('total-usage').innerText = filtered.length;  
-        document.getElementById('log-body').innerHTML = filtered.map((l, i) => `  
-            <tr>  
-                <td><b>${l.unit}</b></td>  
-                <td>${new Date(l.start).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
-                <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
-                <td>${l.dur}m</td>  
-                <td>${parseInt(l.cost || 0).toLocaleString()}</td>  
-                <td><small>${l.staff}</small></td>  
-                <td>${isAdmin ? `<button onclick="deleteLog(${i})" style="background:none; color:var(--danger)">🗑️</button>` : '✔'}</td>  
-            </tr>`).join("");  
-    }  
+    const isAdmin = currentUser && currentUser.role === 'admin';
+
+    // 1. Filter data mentah berdasarkan waktu
+    let filtered = logs.filter(l => {
+        if (currentReportFilter === 'daily') return l.end >= startOfDay;
+        if (currentReportFilter === 'weekly') return l.end >= startOfWeek;
+        if (currentReportFilter === 'monthly') return l.end >= startOfMonth;
+        return true; // 'all'
+    });
+
+    // Hitung Total Pendapatan Global (untuk Card di atas)
+    document.getElementById('income-label').innerText = `Total Pendapatan (${currentReportFilter.toUpperCase()})`;
+    const totalGlobal = filtered.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);
+    document.getElementById('total-income').innerText = "Rp " + totalGlobal.toLocaleString();
+    document.getElementById('total-usage').innerText = filtered.length;
+
+    const tableHead = document.querySelector('#view-reports thead tr');
+    const tableBody = document.getElementById('log-body');
+
+    // --- LOGIKA TAMPILAN ---
+
+    // KONDISI A: Tampilan Harian (Tampilkan detail langsung seperti biasa)
+    if (currentReportFilter === 'daily') {
+        // Set Header Tabel
+        tableHead.innerHTML = `<th>Unit</th><th>Jam</th><th>Durasi</th><th>Biaya</th><th>Staff</th><th>Aksi</th>`;
+        
+        tableBody.innerHTML = filtered.map((l, i) => {
+            // Kita perlu mencari index asli di array 'logs' global untuk fitur hapus
+            const originalIndex = logs.indexOf(l); 
+            return `
+            <tr>
+                <td><b>${l.unit}</b></td>
+                <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
+                <td>${l.dur}m</td>
+                <td style="color:${l.paid ? 'var(--text)' : 'var(--danger)'}">${parseInt(l.cost || 0).toLocaleString()}</td>
+                <td><small>${l.staff}</small></td>
+                <td>${isAdmin ? `<button onclick="deleteLog(${originalIndex})" style="background:none; color:var(--danger)">🗑️</button>` : '✔'}</td>
+            </tr>`;
+        }).join("");
+    } 
+    
+    // KONDISI B: Tampilan Mingguan/Bulanan/Semua (Rekap per Tanggal)
+    else {
+        // Set Header Tabel Khusus Rekap
+        tableHead.innerHTML = `<th>Tanggal</th><th>Total Unit</th><th>Pendapatan</th><th>Detail</th>`;
+
+        // Grouping Data Berdasarkan Tanggal
+        const groups = {};
+        
+        filtered.forEach(log => {
+            // Buat key tanggal (misal: "Senin, 10/02/2026")
+            const dateKey = new Date(log.end).toLocaleDateString('id-ID', { 
+                weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' 
+            });
+
+            if (!groups[dateKey]) {
+                groups[dateKey] = { total: 0, count: 0, logs: [], rawDate: log.end };
+            }
+            
+            if (log.paid) groups[dateKey].total += parseInt(log.cost);
+            groups[dateKey].count++;
+            groups[dateKey].logs.push(log);
+        });
+
+        // Konversi Object ke Array & Sortir dari yang terbaru
+        const sortedGroups = Object.entries(groups).sort((a, b) => b[1].rawDate - a[1].rawDate);
+
+        tableBody.innerHTML = sortedGroups.map(([dateStr, data]) => `
+            <tr style="background: rgba(255,255,255,0.05);">
+                <td style="text-align:left; font-weight:bold;">${dateStr}</td>
+                <td>${data.count} Unit</td>
+                <td style="color:var(--success); font-weight:bold;">Rp ${data.total.toLocaleString()}</td>
+                <td>
+                    <button class="btn-main" 
+                        style="padding: 5px 10px; font-size: 0.7rem; background: var(--accent); width: auto;"
+                        onclick='showDateDetails(${JSON.stringify(data.logs)}, "${dateStr}", ${data.total})'>
+                        LIHAT
+                    </button>
+                </td>
+            </tr>
+        `).join("");
+    }
+}
+
 
     function registerUser() {  
         const u = document.getElementById('new-username').value;  
@@ -1537,5 +1601,67 @@ window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
   
-</script>  </body>  
+  // --- FUNGSI UNTUK MODAL DETAIL LAPORAN ---
+
+function showDateDetails(logList, dateTitle, totalAmount) {
+    const modal = document.getElementById('modal-log-detail');
+    const tbody = document.getElementById('detail-log-body');
+    const title = document.getElementById('detail-date-title');
+    const totalDisplay = document.getElementById('detail-total-amount');
+
+    // Set Judul Tanggal
+    title.innerText = "📅 " + dateTitle;
+    
+    // Set Total Uang di Modal
+    totalDisplay.innerText = "Rp " + totalAmount.toLocaleString();
+    
+    // Isi Tabel Detail
+    tbody.innerHTML = logList.map(l => `
+        <tr>
+            <td style="font-weight:bold">${l.unit}</td>
+            <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
+            <td>${l.dur} mnt</td>
+            <td>${parseInt(l.cost || 0).toLocaleString()}</td>
+            <td style="font-style:italic; font-size:0.7rem">${l.staff || '-'}</td>
+        </tr>
+    `).join("");
+
+    // Tampilkan Modal
+    modal.style.display = 'flex';
+}
+
+function closeDetailModal() {
+    document.getElementById('modal-log-detail').style.display = 'none';
+}
+  
+  
+</script>  <div id="modal-log-detail" class="modal-overlay" style="display:none;">
+    <div class="modal-box" style="max-width: 600px; width: 95%;">
+        <h3 id="detail-date-title" style="margin-bottom: 15px; border-bottom: 2px solid var(--accent); padding-bottom: 10px;">Detail Tanggal</h3>
+        
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table style="width: 100%; font-size: 0.8rem;">
+                <thead style="background: #f1f5f9; position: sticky; top: 0;">
+                    <tr>
+                        <th>Unit</th>
+                        <th>Waktu</th>
+                        <th>Durasi</th>
+                        <th>Bayar</th>
+                        <th>Staff</th>
+                    </tr>
+                </thead>
+                <tbody id="detail-log-body">
+                    </tbody>
+            </table>
+        </div>
+
+        <div style="display:flex; justify-content: space-between; margin-top: 20px; align-items: center;">
+            <div style="text-align: left;">
+                <small>Total Hari Ini:</small><br>
+                <b id="detail-total-amount" style="font-size: 1.2rem; color: var(--success);">Rp 0</b>
+            </div>
+            <button onclick="closeDetailModal()" class="btn-main" style="width: auto; padding: 10px 25px; background: var(--danger);">TUTUP</button>
+        </div>
+    </div>
+</div></body>  
 </html>  
