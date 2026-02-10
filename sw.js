@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinjai-timer-v3';
+const CACHE_NAME = 'sinjai-timer-v1';
 
 const STATIC_ASSETS = [
   './manifest.json',
