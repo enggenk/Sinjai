@@ -20,18 +20,13 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Tahap Aktivasi: Menghapus cache lama jika ada update
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    })
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => caches.delete(k)))
+    )
   );
-  self.clients.claim();
 });
-
 // Tahap Fetch: Mengambil aset dari Cache jika Offline
 self.addEventListener('fetch', (event) => {
   // Biarkan Firebase ditangani secara online oleh SDK-nya sendiri
