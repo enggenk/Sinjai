@@ -1,57 +1,39 @@
-const CACHE_NAME = 'sinjai-timer-v1';
-
-const STATIC_ASSETS = [
+const CACHE_NAME = 'sinjai-timer-v2';
+const assets = [
+  './',
+  './index.html',
   './manifest.json',
   'https://enggenk.github.io/Sinjai/logo-512.png',
+  'https://enggenk.github.io/Sinjai/qris (1).jpg',
   'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-  'https://actions.google.com/sounds/v1/alarms/digital_alarm_clock.ogg',
-  'https://enggenk.github.io/Sinjai/qris (1).jpg'
+  'https://actions.google.com/sounds/v1/alarms/digital_alarm_clock.ogg'
 ];
 
-// INSTALL: cache aset statis SAJA
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+// Tahap Install: Simpan semua file ke memori HP
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(assets);
+    })
   );
-  self.skipWaiting();
 });
 
-// ACTIVATE: bersihkan cache lama
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      )
-    )
+// Tahap Fetch: Ambil dari cache jika offline
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((response) => {
+      return response || fetch(e.request);
+    })
   );
-  self.clients.claim();
 });
 
-// FETCH
-self.addEventListener('fetch', event => {
-  const req = event.request;
-  const url = req.url;
-
-  // ❌ JANGAN SENTUH FIREBASE
-  if (url.includes('firebase') || url.includes('googleapis')) {
-    return;
-  }
-
-  // 🌐 HTML → NETWORK FIRST
-  if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req)
-        .then(res => res)
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-
-  // 🧊 ASET → CACHE FIRST
-  event.respondWith(
-    caches.match(req).then(cached => {
-      return cached || fetch(req);
+// Hapus cache lama jika ada update
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
     })
   );
 });
