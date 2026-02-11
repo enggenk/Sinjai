@@ -1,6 +1,7 @@
-const CACHE_NAME = 'sinjai-timer-v2';
-
-const STATIC_ASSETS = [
+const CACHE_NAME = 'sinjai-timer-v3';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
   './manifest.json',
   'https://enggenk.github.io/Sinjai/logo-512.png',
   'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
@@ -8,50 +9,44 @@ const STATIC_ASSETS = [
   'https://enggenk.github.io/Sinjai/qris (1).jpg'
 ];
 
-// INSTALL: cache aset statis SAJA
-self.addEventListener('install', event => {
+// Tahap Install: Menyimpan aset ke dalam CacheStorage
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('Caching shell assets');
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
   );
   self.skipWaiting();
 });
 
-// ACTIVATE: bersihkan cache lama
-self.addEventListener('activate', event => {
+// Tahap Aktivasi: Menghapus cache lama jika ada update
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      )
-    )
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    })
   );
   self.clients.claim();
 });
 
-// FETCH
-self.addEventListener('fetch', event => {
-  const req = event.request;
-  const url = req.url;
-
-  // ❌ JANGAN SENTUH FIREBASE
-  if (url.includes('firebase') || url.includes('googleapis')) {
+// Tahap Fetch: Mengambil aset dari Cache jika Offline
+self.addEventListener('fetch', (event) => {
+  // Biarkan Firebase ditangani secara online oleh SDK-nya sendiri
+  if (event.request.url.includes('firebase')) {
     return;
   }
 
-  // 🌐 HTML → NETWORK FIRST
-  if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req)
-        .then(res => res)
-        .catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
-
-  // 🧊 ASET → CACHE FIRST
   event.respondWith(
-    caches.match(req).then(cached => {
-      return cached || fetch(req);
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).catch(() => {
+        // Jika gagal fetch (benar-benar offline) dan tidak ada di cache
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
     })
   );
 });
