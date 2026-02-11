@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YSA021 GP - Telemetry</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#15151e">
+
+    <style>
+        :root { 
+            --bg: #15151e; /* Dark Asphalt */
+            --card-bg: #1f1f2b; 
+            --f1-red: #ff1801;
+            --f1-white: #f0f0f0;
+            --sector-green: #2ecc71;
+            --flag-yellow: #f1c40f;
+            --flag-blue: #3498db;
+            --track-limit: #333333;
+            --carbon: repeating-linear-gradient(45deg, #1a1a1a, #1a1a1a 10px, #222 10px, #222 20px);
+        }
+
+        body { 
+            font-family: 'Rajdhani', sans-serif; 
+            background: var(--bg); 
+            background-image: radial-gradient(circle at top right, #2c2c35 0%, #15151e 60%);
+            margin: 0; 
+            padding-bottom: 110px; 
+            color: var(--f1-white); 
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* --- F1 TASKBAR --- */
+        .taskbar { 
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: rgba(21, 21, 30, 0.95); 
+            backdrop-filter: blur(10px); 
+            display: flex; justify-content: space-around; 
+            padding: 15px 10px 25px 10px; 
+            z-index: 1000; 
+            border-top: 3px solid var(--f1-red);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            cursor: pointer; color: #666; 
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            border: none; background: none; transition: 0.3s; flex: 1; 
+        }
+        .nav-item span { font-size: 1.4rem; margin-bottom: 5px; filter: grayscale(100%); transition: 0.3s;}
+        .nav-item.active { color: var(--f1-red); transform: translateY(-5px); text-shadow: 0 0 10px rgba(255, 24, 1, 0.4); }
+        .nav-item.active span { filter: grayscale(0%); }
+        
+        /* --- LOGIN & MODALS --- */
+        #login-overlay, .modal-overlay { 
+            position: fixed; inset: 0; 
+            background: rgba(0, 0, 0, 0.9); 
+            backdrop-filter: blur(5px); 
+            display: flex; align-items: center; justify-content: center; 
+            z-index: 2000; 
+        }
+        .login-box, .modal-box { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 10px; /* Sudut lebih tajam */
+            width: 85%; max-width: 400px; 
+            text-align: center; 
+            border: 1px solid #444;
+            border-left: 5px solid var(--f1-red);
+            box-shadow: 0 0 30px rgba(0,0,0,0.7);
+        }
+        
+        /* --- UTILS --- */
+        h1, h2, h3 { font-family: 'Racing Sans One', cursive; text-transform: uppercase; font-style: italic; letter-spacing: 1px; }
+        .view-section { display: none; padding: 20px; animation: slideIn 0.3s ease-out; }
+        .view-section.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* --- GRID & CARDS (TELEMETRY STYLE) --- */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card { 
+            background: #252530; 
+            border-radius: 8px; 
+            padding: 15px; 
+            text-align: center; 
+            position: relative; 
+            display: flex; flex-direction: column; justify-content: space-between; 
+            min-height: 200px; order: 2; 
+            border: 1px solid #333;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        /* Racing Strip Decoration */
+        .card::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 40px; height: 40px;
+            background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.05) 50%);
+        }
+
+        .card.active-run { 
+            background: linear-gradient(180deg, #1e3a29 0%, #15151e 100%); 
+            border: 1px solid var(--sector-green); 
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.2);
+            order: 1; 
+        }
+        .card.warning-near { 
+            border: 2px solid var(--flag-yellow); 
+            background: linear-gradient(180deg, #3a321e 0%, #15151e 100%);
+            animation: pulse-warning 0.8s infinite; 
+        }
+        .card.expired { 
+            border: 2px solid var(--f1-red); 
+            background: linear-gradient(180deg, #3a1e1e 0%, #15151e 100%);
+            animation: blink-border 0.5s infinite; 
+        }
+
+        .timer-display { 
+            font-family: 'Racing Sans One', cursive; 
+            font-size: 2.5rem; 
+            margin: 10px 0; 
+            color: var(--f1-white);
+            text-shadow: 2px 2px 0px #000;
+        }
+        .active-run .timer-display { color: var(--sector-green); }
+        .expired .timer-display { color: var(--f1-red); }
+
+        .user-tag { 
+            font-size: 0.9rem; color: #fff; font-weight: bold; 
+            background: #333; padding: 2px 8px; 
+            border-radius: 4px; display: inline-block; 
+            margin-bottom: 5px; min-height: 20px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        
+        .staff-badge { font-size: 0.6rem; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- FORMS & BUTTONS --- */
+        input, select { 
+            width: 100%; padding: 12px; margin: 8px 0; 
+            background: #000; color: #fff; 
+            border: 1px solid #444; border-radius: 6px; 
+            outline: none; box-sizing: border-box; 
+            font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: bold;
+        }
+        button { 
+            border: none; padding: 12px; border-radius: 4px; /* Kotak ala tombol setir F1 */
+            font-weight: 800; cursor: pointer; transition: 0.2s; 
+            font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-main { background: var(--f1-red); color: white; width: 100%; box-shadow: 0 4px 0 #990000; }
+        .btn-main:active { transform: translateY(4px); box-shadow: none; }
+        .btn-main:disabled { background: #555; box-shadow: none; color: #888; }
+
+        /* --- ADMIN & TABLES --- */
+        .admin-card { background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+        th { color: #888; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { background: #2a2a35; padding: 10px; border: none; font-size: 0.9rem; }
+        tr td:first-child { border-top-left-radius: 6px; border-bottom-left-radius: 6px; border-left: 3px solid var(--f1-red); }
+        tr td:last-child { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes pulse-warning { 0% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(241, 196, 15, 0); } 100% { box-shadow: 0 0 0 0 rgba(241, 196, 15, 0); } }
+        @keyframes blink-border { 0%, 100% { border-color: var(--f1-red); background-color: rgba(255, 24, 1, 0.1); } 50% { border-color: transparent; background-color: transparent; } }
+
+        /* --- OFFLINE BANNER --- */
+        #offline-banner { background: var(--flag-yellow); color: #000; font-weight: 900; letter-spacing: 1px; border-bottom: 2px solid #000; }
+
+        /* 🔝 Sticky Card */
+        .card.pin-top { order: 0 !important; z-index: 10; border: 3px solid var(--f1-red); box-shadow: 0 0 20px var(--f1-red); }
+    </style>
+</head>
+<body>
+    
+<audio id="alarm-finished" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>  
+<audio id="alarm-warning" src="https://actions.google.com/sounds/v1/alarms/digital_alarm_clock.ogg"></audio>  
+
+<div id="login-overlay">  
+    <div class="login-box">  
+        <span style="font-size:4rem">🏁</span>  
+        <h1 style="margin: 10px 0 5px 0; color: var(--f1-white);">GP SINJAI</h1>
+        <p style="color:#888; margin-top:0; font-size:0.8rem; letter-spacing:2px;">TIMING SYSTEM v2.1</p>  
+        <div id="loading-text" style="color:var(--flag-yellow)">CONNECTING TO PADDOCK...</div>  
+        <div id="login-form" style="display:none;">  
+            <input type="text" id="user-input" placeholder="TEAM PRINCIPAL">  
+            <input type="password" id="pass-input" placeholder="ACCESS CODE">  
+            <button onclick="attemptLogin()" class="btn-main" style="margin-top:15px">ENTER PADDOCK</button>  
+            <p id="login-err" style="color:var(--f1-red); font-weight:bold; margin-top:10px; display:none;">RED FLAG: ACCESS DENIED!</p>  
+        </div>  
+    </div>  
+</div>  
+
+<div id="app" style="display:none;">  
+    <div id="offline-banner" style="display:none; text-align: center; padding: 10px; font-size: 0.8rem; position: sticky; top: 0; z-index: 2001;">
+        ⚠ CONNECTION LOST - SAFETY CAR DEPLOYED (OFFLINE MODE)
+    </div>
+
+    <div id="view-units" class="view-section active">  
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom: 1px solid #333; padding-bottom: 10px;">  
+            <div>
+                <h2 style="margin:0; font-style: italic;">TRACK POSITIONS</h2>
+                <small id="current-user-display" style="color:#666; font-weight:bold; letter-spacing: 1px;"></small>  
+            </div>
+            <div style="text-align:right; border: 2px solid #444; padding: 5px 10px; border-radius: 4px; background: #000;">  
+                <div style="font-size:0.6rem; color:#888;">LOCAL TIME</div>
+                <div id="live-clock" style="font-weight:bold; color:var(--f1-white); font-family: 'Racing Sans One'; font-size: 1.2rem;">00:00:00</div>  
+            </div>  
+        </div>  
+        <div class="grid" id="unit-container"></div>  
+        <button class="btn-main" style="margin-top:25px; background:#333; border: 1px dashed #666; color: #aaa;" onclick="addNewUnit()">+ ADD NEW CHASSIS</button>  
+    </div>  
+
+    <div id="view-queue" class="view-section">  
+        <h2 style="color:var(--f1-white)">🚥 PIT LANE QUEUE</h2>  
+        <div class="admin-card">  
+            <input type="text" id="q-name" placeholder="DRIVER NAME" oninput="checkQueueReady()">  
+            <div style="display: flex; gap: 10px;">  
+                <select id="q-dur" onchange="checkQueueReady()" style="background: #111;">  
+                    <option value="" disabled selected>STINT DURATION</option>  
+                    <option value="20">20 Mins (Sprint)</option>
+                    <option value="40">40 Mins (GP)</option>
+                    <option value="60">1 Hour (Endurance)</option>  
+                </select>  
+                <select id="q-pay-init" onchange="checkQueueReady()" style="background: #111;">  
+                    <option value="" disabled selected>FEE STATUS</option>  
+                    <option value="false">NOT PAID</option>
+                    <option value="true">PAID</option>  
+                </select>  
+            </div>  
+            <button id="btn-add-queue" onclick="addToQueue()" class="btn-main" style="margin-top:10px" disabled>ADD TO GRID</button>  
+        </div>  
+        <div class="admin-card" style="padding:10px;"><table id="queue-table"></table></div>  
+    </div>  
+
+    <div id="view-qris" class="view-section">  
+        <div style="text-align: center; background: white; padding: 25px; border-radius: 10px; border-top: 5px solid var(--f1-red);">  
+            <img src="https://enggenk.github.io/Sinjai/qris (1).jpg" alt="QRIS" style="width:100%; max-width:280px; mix-blend-mode: multiply;">  
+            <h3 style="margin:15px 0 5px; color:black;">ELICE STORE TEAM</h3>  
+            <code style="color:var(--f1-red); font-weight:bold; font-size: 1.1rem;">NMID: ID1024336934079</code>  
+        </div>  
+    </div>  
+
+    <div id="view-reports" class="view-section">  
+        <div class="admin-card" style="background: linear-gradient(135deg, #1e1e24 0%, #000 100%); border: 1px solid var(--sector-green); text-align:center">  
+            <p style="margin:0; color:#888; font-size:0.8rem; letter-spacing:1px;" id="income-label">REVENUE TELEMETRY</p>  
+            <h1 id="total-income" style="margin:10px 0; font-size:2.5rem; color: var(--sector-green)">Rp 0</h1>  
+            <div style="background: #111; border-radius: 4px; padding: 5px; margin-top: 5px; display:inline-block;">  
+                <small style="color:#ccc;">TOTAL LAPS: <b id="total-usage" style="color:white;">0</b></small>  
+            </div>  
+        </div>  
+        <div class="filter-bar" style="display:flex; gap:5px; margin-bottom:15px; overflow-x:auto;">  
+            <button class="filter-btn active" onclick="setReportFilter('all', this)" style="flex:1; background:var(--f1-red); color:white; border:none; padding:8px; border-radius:4px;">ALL</button>  
+            <button class="filter-btn" onclick="setReportFilter('daily', this)" style="flex:1; background:#333; color:#aaa; border:none; padding:8px; border-radius:4px;">TODAY</button>  
+            <button class="filter-btn" onclick="setReportFilter('weekly', this)" style="flex:1; background:#333; color:#aaa; border:none; padding:8px; border-radius:4px;">WEEK</button>  
+            <button class="filter-btn" onclick="setReportFilter('monthly', this)" style="flex:1; background:#333; color:#aaa; border:none; padding:8px; border-radius:4px;">MONTH</button>  
+        </div>  
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">  
+            <h3 style="margin:0; font-size:1rem; color:#888;">SESSION HISTORY</h3>  
+            <button class="restrict-admin" onclick="clearAllLogs()" style="background:var(--f1-red); color:white; padding:5px 12px; border-radius:4px; font-size:0.7rem;">PURGE DATA</button>  
+        </div>  
+        <div class="admin-card" style="padding:0; overflow-x:auto; background:none; border:none;">  
+            <table>  
+                <thead style="background:#111; color:white;">  
+                    <tr><th>CAR</th><th>START</th><th>FIN</th><th>DUR</th><th>FEE</th><th>ENG</th><th>ACT</th></tr>  
+                </thead>  
+                <tbody id="log-body"></tbody>  
+            </table>  
+        </div>  
+    </div>  
+
+    <div id="view-admin" class="view-section">  
+        <div class="admin-card restrict-admin">  
+            <h3 style="color:var(--flag-blue)">👥 CREW MANAGEMENT</h3>  
+            <input type="text" id="new-username" placeholder="Username">  
+            <input type="password" id="new-password" placeholder="Password">  
+            <select id="new-role"><option value="staff">Race Engineer (Staff)</option><option value="admin">Team Principal (Admin)</option></select>  
+            <button onclick="registerUser()" class="btn-main" style="background:var(--sector-green)">SAVE CREW</button>  
+            <table style="margin-top:15px"><tbody id="user-list-body"></tbody></table>  
+        </div>  
+        <div class="admin-card restrict-admin">  
+            <h3 style="color:var(--flag-yellow)">💰 TICKET PRICING</h3>  
+            <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px; align-items:center; margin-bottom:5px;">
+                <label>20 Min</label><input type="number" id="p-20">  
+                <label>40 Min</label><input type="number" id="p-40">  
+                <label>60 Min</label><input type="number" id="p-60">
+            </div>  
+            <button onclick="savePrices()" class="btn-main" style="background:var(--sector-green); margin-top:10px">UPDATE CONFIG</button>  
+        </div>  
+        <div class="admin-card restrict-admin" style="border: 1px dashed var(--f1-white);">  
+            <h3>💾 DATA TELEMETRY</h3>  
+            <button onclick="exportData()" class="btn-main" style="background:#444">EXPORT JSON</button>  
+        </div>  
+       <button onclick="logout()" class="btn-main" style="background:#111; color: var(--f1-red); border: 1px solid var(--f1-red); margin-top:20px;">  
+            EXIT PADDOCK (LOGOUT)
+        </button>  
+    </div>  
+
+    <div class="taskbar">  
+        <button class="nav-item active" onclick="switchView('units', this)"><span>🏎️</span>TRACK</button>  
+        <button class="nav-item" onclick="switchView('queue', this)"><span>📋</span>GRID</button>  
+        <button class="nav-item" onclick="switchView('qris', this)"><span>💳</span>PAY</button>  
+        <button class="nav-item" onclick="switchView('reports', this)"><span>📊</span>DATA</button>  
+        <button class="nav-item" onclick="switchView('admin', this)"><span>⚙️</span>SETUP</button>  
+    </div>  
+</div>  
+
+<div id="modal-start" class="modal-overlay" style="display:none;">  
+    <div class="modal-box">  
+        <h2 style="border-bottom: 2px solid var(--f1-red); padding-bottom:10px; margin-bottom:20px;">START SESSION</h2>  
+        <div id="dur-options" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;"></div>  
+        <p style="text-align:left; font-weight:bold; margin: 20px 0 5px; color:#888;">PAYMENT STATUS:</p>  
+        <div style="display: flex; gap: 10px;">  
+            <button id="opt-unpaid" class="btn-main" style="background:#333; color:#fff;" onclick="setTempPay(false)">UNPAID</button>  
+            <button id="opt-paid" class="btn-main" style="background:#333; color:#fff;" onclick="setTempPay(true)">PAID</button>  
+        </div>  
+        <button id="btn-confirm-start" class="btn-main" style="margin-top:25px; background: var(--sector-green); box-shadow: 0 4px 0 #219150;" onclick="confirmStart()" disabled>LIGHTS OUT!</button>  
+        <button onclick="closeModal()" style="background:none; color:#888; margin-top:10px; width:100%">ABORT START</button>  
+    </div>  
+</div>  
+
+<div id="modal-stop-confirm" class="modal-overlay" style="display:none;">  
+    <div class="modal-box" style="border-color: var(--f1-red);">  
+        <span style="font-size:3rem">🚩</span>
+        <h2 id="stop-msg"></h2>  
+        <div id="check-return-section">  
+            <p>Car entering pit lane?</p>
+            <button class="btn-main" style="background:var(--f1-red)" onclick="showPaymentAction()">BOX BOX (STOP)</button>  
+            <button class="btn-main" style="background:#333; margin-top:10px" onclick="closeStopModal()">STAY OUT</button>  
+        </div>  
+        <div id="payment-action-section" style="display:none; margin-top: 15px;">  
+            <div id="payment-status-display"></div>  
+            <div id="stop-final-btn-group" style="margin-top:20px"></div>  
+        </div>  
+    </div>  
+</div>  
+
+<div id="modal-swap-unit" class="modal-overlay" style="display:none;">  
+    <div class="modal-box">  
+        <h3 id="swap-unit-title">SWAP POSITION</h3>  
+        <p style="color:#888; font-size:0.8rem;">Select empty grid slot:</p>  
+        <div id="swap-unit-list" style="display:flex; flex-direction:column; gap:10px;"></div>  
+        <button onclick="closeSwapModal()" style="background:none; color:#888; margin-top:15px; width:100%">CANCEL</button>  
+    </div>  
+</div>  
+
+<div id="modal-q-select" class="modal-overlay" style="display:none;">  
+    <div class="modal-box">  
+        <h3>SELECT GRID SLOT</h3>  
+        <div id="unit-selection-list" style="display:flex; flex-direction:column; gap:10px;"></div>  
+        <button onclick="closeQModal()" style="background:none; color:var(--f1-red); margin-top:20px; width:100%">CLOSE</button>  
+    </div>  
+</div>
+
+<div id="modal-install-pwa" class="modal-overlay" style="display:none; z-index: 3000;">  
+    <div class="modal-box">  
+        <span style="font-size:3rem">🏎️</span>  
+        <h3>INSTALL TELEMETRY</h3>  
+        <p style="color:#aaa;">Add <b>GP Sinjai</b> to your home screen for full cockpit experience.</p>  
+        <button id="btn-install-pwa" class="btn-main" style="background:var(--f1-red); margin-top:15px">INSTALL NOW</button>  
+        <button onclick="closeInstallModal()" style="background:none; color:#666; margin-top:10px; width:100%">LATER</button>  
+    </div>  
+</div>  
+
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>  
+<script>  
+const firebaseConfig = {
+apiKey: "AIzaSyCINEztpEybnoiqaXzGnabilMUSGx5KiBU",
+authDomain: "nunukan1.firebaseapp.com",
+databaseURL: "https://nunukan1-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "nunukan1",
+storageBucket: "nunukan1.firebasestorage.app",
+messagingSenderId: "300658059555",
+appId: "1:300658059555:web:81e7297865fe478774c496",
+measurementId: "G-JN56RRPRFD"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let users = [], unitNames = [], prices = {}, logs = [], queue = [];  
+let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};  
+      
+const offlineData = localStorage.getItem('offline_backup');
+if (offlineData) {
+    console.log('📦 Backup Loaded');
+    const data = JSON.parse(offlineData);
+    users = data.users || users;  
+    unitNames = data.unitNames || unitNames;  
+    prices = data.prices || prices;  
+    logs = data.logs || [];  
+    queue = data.queue || [];  
+    endTimes = data.endTimes || {};  
+    startTimes = data.startTimes || {};  
+    isPaused = data.isPaused || {};  
+    isPaid = data.isPaid || {};  
+    activeUsers = data.activeUsers || {};  
+    activeDurations = data.activeDurations || {};  
+    activeStaff = data.activeStaff || {};  
+    activeTransferInfo = data.activeTransferInfo || {};  
+}
+
+if (!navigator.onLine && offlineData) {  
+    initOfflineApp();  
+    bootstrapApp();
+}
+
+let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';  
+      
+function bootstrapApp() {  
+    const savedUser = localStorage.getItem('currentUser');  
+    if (!savedUser) return;  
+    currentUser = JSON.parse(savedUser);  
+    document.getElementById('login-overlay').style.display = 'none';  
+    document.getElementById('app').style.display = 'block';  
+    document.getElementById('current-user-display').innerText = "ENGINEER: " + currentUser.user.toUpperCase();  
+    applyPermissions();  
+    initDashboard();  
+    renderQueue();  
+    renderLogs();  
+    renderUserList();
+}
+
+function initOfflineApp() {  
+    const savedUser = localStorage.getItem('currentUser');  
+    if (savedUser) {  
+        currentUser = JSON.parse(savedUser);  
+        document.getElementById('login-overlay').style.display = 'none';  
+        document.getElementById('app').style.display = 'block';  
+        document.getElementById('current-user-display').innerText = "OFFLINE: " + currentUser.user.toUpperCase();  
+        applyPermissions();  
+        initDashboard();  
+        renderQueue();  
+        renderLogs();  
+        renderUserList();  
+    } else {  
+        document.getElementById('login-form').style.display = 'none';  
+        document.getElementById('loading-text').innerText = "OFFLINE - NO ACCESS";  
+    }
+}
+
+let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;  
+let expiredUnits = new Set();
+let voiceInterval = null; 
+
+function loadFromLocalStorage() {
+    const offlineData = localStorage.getItem('offline_backup');
+    if (offlineData) {
+        const data = JSON.parse(offlineData);
+        users = data.users || users;
+        unitNames = data.unitNames || data.units || unitNames;
+        prices = data.prices || prices;
+        logs = data.logs || [];
+        queue = data.queue || [];
+        endTimes = data.endTimes || {};
+        startTimes = data.startTimes || {};
+        isPaused = data.isPaused || {};
+        isPaid = data.isPaid || {};
+        activeUsers = data.activeUsers || {};
+        activeDurations = data.activeDurations || {};
+        activeStaff = data.activeStaff || {};
+        activeTransferInfo = data.activeTransferInfo || {};
+        bootstrapApp(); 
+    }
+}
+loadFromLocalStorage();
+
+db.ref('app_data').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+    users = data.users || users;  
+    unitNames = data.units || unitNames;  
+    prices = data.prices || prices;  
+    logs = data.logs || [];  
+    queue = data.queue || [];  
+    endTimes = data.endTimes || {};  
+    startTimes = data.startTimes || {};   
+    isPaused = data.isPaused || {};  
+    isPaid = data.isPaid || {};  
+    activeUsers = data.activeUsers || {};  
+    activeDurations = data.activeDurations || {};  
+    activeStaff = data.activeStaff || {};  
+    activeTransferInfo = data.activeTransferInfo || {};  
+    document.getElementById('loading-text').style.display = 'none';  
+    document.getElementById('login-form').style.display = 'block';  
+    if (currentUser) {  
+        initDashboard();  
+        renderQueue();  
+        renderLogs();  
+        if(document.getElementById('p-20')) {  
+            document.getElementById('p-20').value = prices[20] || 0;  
+            document.getElementById('p-40').value = prices[40] || 0;  
+            document.getElementById('p-60').value = prices[60] || 0;  
+        }  
+    }  
+    saveLocalBackup();
+}, (error) => {
+    document.getElementById('loading-text').innerText = "Offline Mode";
+    document.getElementById('login-form').style.display = 'block';
+});
+
+function saveAppState() {  
+    const data = {  
+        users, units: unitNames, prices, logs, queue,  
+        endTimes, startTimes, isPaused, isPaid,  
+        activeUsers, activeDurations, activeStaff, activeTransferInfo,  
+        _updatedAt: Date.now()  
+    };  
+    localStorage.setItem('offline_backup', JSON.stringify(data));  
+    db.ref('app_data').update(data)  
+        .then(() => localStorage.removeItem('pending_sync'))  
+        .catch(() => {  
+           handleSyncFailure(); 
+        });
+}
+
+function handleSyncFailure() {
+    localStorage.setItem('pending_sync', 'true');
+}
+
+function saveLocalBackup() {
+    const payload = {
+        users, unitNames, prices, logs, queue,
+        endTimes, startTimes, isPaused, isPaid,
+        activeUsers, activeDurations, activeStaff, activeTransferInfo,
+        _lastUpdate: Date.now()
+    };
+    localStorage.setItem('offline_backup', JSON.stringify(payload));
+}
+
+function attemptLogin() {
+    if (!navigator.onLine) { alert("First login must be online"); return; }
+    const u = document.getElementById('user-input').value;  
+    const p = document.getElementById('pass-input').value;  
+    const userFound = users.find(x => x.user === u && x.pass === p);  
+    if (userFound) {  
+        currentUser = userFound;  
+        localStorage.setItem('currentUser', JSON.stringify(userFound));  
+        document.getElementById('login-overlay').style.display = 'none';  
+        document.getElementById('app').style.display = 'block';  
+        applyPermissions();  
+        initDashboard();  
+        renderQueue();  
+        renderLogs();  
+        renderUserList();  
+    } else {  
+        document.getElementById('login-err').style.display = 'block';  
+    }
+}
+
+function applyPermissions() {  
+    const isAdmin = currentUser && currentUser.role === 'admin';  
+    document.querySelectorAll('.restrict-admin').forEach(el => {   
+        el.style.display = isAdmin ? 'block' : 'none';   
+    });  
+}  
+
+function switchView(viewId, btn) {  
+    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));  
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));  
+    document.getElementById('view-' + viewId).classList.add('active');  
+    btn.classList.add('active');  
+    
+    // Reset style button filter
+    document.querySelectorAll('.filter-btn').forEach(b => {
+       if(b.classList.contains('active')) {
+           b.style.backgroundColor = "var(--f1-red)";
+           b.style.color = "white";
+       } else {
+           b.style.backgroundColor = "#333";
+           b.style.color = "#aaa";
+       }
+    });
+}
+
+function initDashboard() {
+    const container = document.getElementById('unit-container');
+    container.innerHTML = "";
+    unitNames.forEach((name, i) => {  
+        const isActive = !!endTimes[i];  
+        container.innerHTML += `  
+            <div class="card ${isActive ? 'active-run' : ''}" id="card-${i}">  
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">  
+                    <div style="font-weight:900; font-size:1.2rem; font-style:italic;">${name}</div>  
+                    <div style="display:flex; gap:8px;">  
+                        ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--flag-blue); font-size:1rem; padding:0;">🔄</button>` : ''}  
+                        <div style="display:flex; gap:5px;">  
+                            <button onclick="editUnitName(${i})" style="background:none; color:#666; padding:0;">🔧</button>  
+                            <button onclick="deleteUnit(${i})" style="background:none; color:#444; padding:0;">❌</button>  
+                        </div>  
+                    </div>  
+                </div>  
+                <div class="user-tag">${activeUsers[i] || "PIT LANE"}</div>  
+                <div class="transfer-tag" style="font-size:0.6rem; color:#f39c12; font-style:italic;">${activeTransferInfo[i] ? "FROM " + activeTransferInfo[i] : ""}</div>  
+                <div class="timer-display" id="timer-${i}">READY</div>  
+                <div id="ctrl-${i}">  
+                    ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">START ENGINE</button>`}  
+                </div>  
+                <div class="staff-badge">${activeStaff[i] ? "ENG: " + activeStaff[i] : ""}</div>  
+            </div>`;  
+        if(isActive) resumeTimer(i);  
+    });
+}
+
+function resumeTimer(i) {  
+    if(timers[i]) clearInterval(timers[i]);  
+    renderRunningCtrl(i);  
+    timers[i] = setInterval(() => {  
+        if(isPaused[i]) { endTimes[i] += 1000; return; }  
+        const diff = endTimes[i] - Date.now();  
+        if(diff > 0) {  
+            let m = Math.floor(diff / 60000), s = Math.floor((diff % 60000) / 1000);  
+            const el = document.getElementById(`timer-${i}`);  
+            if(el) el.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;  
+            if(diff <= 60000 && !warningPlayed[i]) {  
+                document.getElementById(`card-${i}`).classList.add('warning-near');  
+                document.getElementById('alarm-warning').play();  
+                warningPlayed[i] = true;  
+            }
+        } else {
+            clearInterval(timers[i]);
+            const el = document.getElementById(`timer-${i}`);  
+            if (el) el.innerText = "00:00";  
+            const card = document.getElementById(`card-${i}`);  
+            card.className = 'card expired pin-top'; 
+            document.getElementById('alarm-finished').play();  
+            expiredUnits.add(unitNames[i]);  
+            startVoiceLoop();  
+            speakExpired(unitNames[i]);
+        }
+    }, 1000);
+}
+
+function renderRunningCtrl(i) {  
+    const ctrl = document.getElementById(`ctrl-${i}`);  
+    if(!ctrl) return;  
+    ctrl.innerHTML = `  
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">  
+            <button style="grid-column:span 2; font-size:0.8rem; background:${isPaid[i]?'var(--sector-green)':'var(--f1-red)'}; color:white" onclick="confirmTogglePay(${i})">${isPaid[i]?'PAID (OK)':'UNPAID (WARNING)'}</button>  
+            <button class="btn-main" style="background:#333; color:white; font-size:0.7rem;" onclick="adjustTime(${i}, -60000)">-1 LAP</button>  
+            <button class="btn-main" style="background:#333; color:white; font-size:0.7rem;" onclick="adjustTime(${i}, 60000)">+1 LAP</button>  
+            <button style="background:var(--flag-yellow); color:black" onclick="pause(${i})">${isPaused[i]?'GO':'Pause'}</button>  
+            <button style="background:var(--f1-red); color:white" onclick="triggerStop(${i})">BOX</button>  
+        </div>`;  
+}  
+
+function openSwapModal(i) {  
+    swapSourceIdx = i;  
+    document.getElementById('swap-unit-title').innerText = "SWAP: " + unitNames[i];  
+    const list = document.getElementById('swap-unit-list');  
+    list.innerHTML = "";  
+    let emptyUnitsFound = false;  
+    unitNames.forEach((name, idx) => {  
+        const isBusy = (endTimes[idx] && (endTimes[idx] > Date.now() || isPaused[idx]));  
+        if(!isBusy && idx !== i) {  
+            emptyUnitsFound = true;  
+            const btn = document.createElement('button');  
+            btn.className = "btn-main";  
+            btn.style.background = "#333";
+            btn.style.border = "1px solid var(--sector-green)";
+            btn.innerText = "MOVE TO " + name;  
+            btn.onclick = () => executeSwap(idx);  
+            list.appendChild(btn);  
+        }  
+    });  
+    if(!emptyUnitsFound) list.innerHTML = "<p style='color:red'>NO EMPTY SLOTS!</p>";  
+    document.getElementById('modal-swap-unit').style.display = 'flex';  
+}  
+
+function executeSwap(targetIdx) {  
+    const s = swapSourceIdx; const t = targetIdx;  
+    endTimes[t] = endTimes[s]; startTimes[t] = startTimes[s];  
+    isPaused[t] = isPaused[s]; isPaid[t] = isPaid[s];  
+    activeUsers[t] = activeUsers[s]; activeDurations[t] = activeDurations[s];  
+    activeStaff[t] = activeStaff[s]; activeTransferInfo[t] = unitNames[s];  
+    delete endTimes[s]; delete startTimes[s]; delete activeUsers[s];   
+    delete activeDurations[s]; delete activeStaff[s]; delete isPaused[s];   
+    delete isPaid[s]; delete activeTransferInfo[s];  
+    if(timers[s]) clearInterval(timers[s]);  
+    saveAppState(); closeSwapModal();  
+}  
+
+function closeSwapModal() { document.getElementById('modal-swap-unit').style.display = 'none'; }  
+
+function openStart(i) {   
+    activeUnitIdx = i;   
+    tempDur = null;   
+    tempPay = null;   
+    const btnPaid = document.getElementById('opt-paid');  
+    const btnUnpaid = document.getElementById('opt-unpaid');  
+    btnPaid.style.background = "#333"; btnPaid.style.color = "#fff";  
+    btnUnpaid.style.background = "#333"; btnUnpaid.style.color = "#fff";  
+    document.getElementById('btn-confirm-start').disabled = true;   
+    document.getElementById('modal-start').style.display = 'flex';   
+    document.getElementById('dur-options').innerHTML = [20,40,60].map(d => {  
+        const price = prices[d] || 0;  
+        return `  
+        <button class="btn-main dur-btn"  
+            style="background:#111; color:white; border:1px solid #444; padding:12px 6px;"  
+            onclick="setTempDur(${d}, this)">  
+            <div style="font-weight:800; font-size:1.1rem;">${d === 60 ? '1 H' : d + ' m'}</div>  
+            <div style="font-size:0.7rem; color:var(--sector-green); margin-top:4px;">${price/1000}k</div>  
+        </button>  
+        `;  
+    }).join("");
+}
+
+function setTempDur(d, btn) { 
+    tempDur = d; 
+    document.querySelectorAll('#dur-options button').forEach(b => {
+        b.style.borderColor = "#444"; 
+        b.style.background = "#111";
+    }); 
+    btn.style.borderColor = "var(--f1-red)"; 
+    btn.style.background = "#220000";
+    checkReady(); 
+}  
+function setTempPay(s) {  
+    tempPay = s;  
+    const btnPaid = document.getElementById('opt-paid');  
+    const btnUnpaid = document.getElementById('opt-unpaid');  
+    btnPaid.style.background = "#333"; btnPaid.style.color = "#fff";  
+    btnUnpaid.style.background = "#333"; btnUnpaid.style.color = "#fff";  
+    if (s === true) {  
+        btnPaid.style.background = "var(--sector-green)"; btnPaid.style.color = "white";  
+    } else if (s === false) {  
+        btnUnpaid.style.background = "var(--f1-red)"; btnUnpaid.style.color = "white";  
+    }  
+    checkReady();
+}
+
+function checkReady() {   
+    if(tempDur && tempPay !== null) {  
+        document.getElementById('btn-confirm-start').disabled = false;   
+    } else {  
+        document.getElementById('btn-confirm-start').disabled = true;  
+    }
+}
+
+function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeModal(); }  
+
+function startUnit(i, dur, paid, userName) {   
+    const now = Date.now();  
+    startTimes[i] = now;  
+    endTimes[i] = now + (dur * 60 * 1000);   
+    isPaid[i] = paid; isPaused[i] = false; activeUsers[i] = userName || "DRIVER";   
+    activeDurations[i] = dur; activeStaff[i] = currentUser.user;   
+    delete activeTransferInfo[i];  
+    warningPlayed[i] = false;   
+    saveAppState();  
+}  
+
+function triggerStop(i) {   
+    stopIdx = i;   
+    document.getElementById('modal-stop-confirm').style.display = 'flex';   
+    document.getElementById('stop-msg').innerText = unitNames[i] ;   
+    document.getElementById('check-return-section').style.display = 'block';   
+    document.getElementById('payment-action-section').style.display = 'none';   
+}  
+
+function showPaymentAction() {   
+    document.getElementById('check-return-section').style.display = 'none';   
+    document.getElementById('payment-action-section').style.display = 'block';   
+    const cost = parseInt(prices[activeDurations[stopIdx]]) || 0;   
+    document.getElementById('payment-status-display').innerHTML = isPaid[stopIdx] ?   
+        `<h2 style="color:var(--sector-green)">PAID (OK)</h2>` : `<h2 style="color:var(--f1-red)">DUE: Rp ${cost.toLocaleString()}</h2>`;   
+    document.getElementById('stop-final-btn-group').innerHTML = `  
+        <button class="btn-main" style="background:var(--sector-green)" onclick="finalStop(${stopIdx}, ${!isPaid[stopIdx]})">CONFIRM EXIT</button>   
+        <button class="btn-main" style="background:#333; margin-top:10px" onclick="closeStopModal()">CANCEL</button>`;   
+}
+
+function finalStop(i, markAsPaid) {
+    expiredUnits.delete(unitNames[i]);   
+    speechSynthesis.cancel();            
+    if (expiredUnits.size === 0) { stopVoiceLoop(); }  
+    if (markAsPaid) isPaid[i] = true;  
+    logs.unshift({  
+        unit: unitNames[i],  
+        start: startTimes[i],  
+        end: Date.now(),  
+        dur: activeDurations[i],  
+        paid: isPaid[i],  
+        cost: prices[activeDurations[i]],  
+        staff: activeStaff[i]  
+    });  
+    clearInterval(timers[i]);  
+    delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];  
+    delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];  
+    delete isPaid[i]; delete activeTransferInfo[i];  
+    saveAppState();  
+    closeStopModal();
+}
+
+function closeStopModal() { document.getElementById('modal-stop-confirm').style.display = 'none'; }
+
+function addToQueue() {   
+    const name = document.getElementById('q-name').value;  
+    const dur = document.getElementById('q-dur').value;  
+    const paid = document.getElementById('q-pay-init').value === "true";  
+    queue.push({name, dur, paid}); saveAppState();   
+    document.getElementById('q-name').value = "";   
+}  
+
+function renderQueue() {   
+    document.getElementById('queue-table').innerHTML = queue.map((q, idx) => `  
+        <tr>  
+            <td style="text-align:left; color:white;"><b>${q.name}</b><br><small style="color:var(--f1-red)">${q.dur} MIN</small></td>  
+            <td><span class="user-tag" style="background:${q.paid ? 'var(--sector-green)' : 'var(--f1-red)'}" onclick="toggleQueuePaid(${idx})">${q.paid ? 'PAID' : 'UNPAID'}</span></td>  
+            <td style="text-align:right">  
+                <button onclick="openQSelectModal(${idx})" style="background:var(--sector-green); color:white; padding:5px 10px;">GO</button>   
+                <button onclick="queue.splice(${idx},1);saveAppState()" style="color:var(--f1-red); background:none">X</button>  
+            </td>  
+        </tr>`).join("");   
+}  
+
+function openQSelectModal(idx) {   
+    selectedQIdx = idx;   
+    const list = document.getElementById('unit-selection-list');   
+    list.innerHTML = "";   
+    unitNames.forEach((name, i) => {   
+        const busy = endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]);  
+        list.innerHTML += `<button class="btn-main" style="background:${busy ? '#222' : 'var(--sector-green)'}; border: 1px solid #444;" ${busy ? 'disabled' : ''} onclick="confirmQueueStart(${i})">${name}</button>`;   
+    });   
+    document.getElementById('modal-q-select').style.display = 'flex';   
+}  
+
+function confirmQueueStart(unitIdx) {   
+    const q = queue[selectedQIdx];   
+    startUnit(unitIdx, parseInt(q.dur), q.paid, q.name);   
+    queue.splice(selectedQIdx, 1);   
+    saveAppState();   
+    closeQModal();   
+    switchView('units', document.querySelectorAll('.nav-item')[0]);
+}
+
+function renderLogs() {  
+    const now = new Date();  
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();  
+    const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);  
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();  
+    const isAdmin = currentUser && currentUser.role === 'admin';  
+    let filtered = logs.filter(l => {  
+        if (currentReportFilter === 'daily') return l.end >= startOfDay;  
+        if (currentReportFilter === 'weekly') return l.end >= startOfWeek;  
+        if (currentReportFilter === 'monthly') return l.end >= startOfMonth;  
+        return true;  
+    });  
+    document.getElementById('income-label').innerText = `REVENUE (${currentReportFilter.toUpperCase()})`;  
+    const total = filtered.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);  
+    document.getElementById('total-income').innerText = "Rp " + total.toLocaleString();  
+    document.getElementById('total-usage').innerText = filtered.length;  
+    document.getElementById('log-body').innerHTML = filtered.map((l, i) => `  
+        <tr>  
+            <td><b>${l.unit}</b></td>  
+            <td>${new Date(l.start).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
+            <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
+            <td>${l.dur}m</td>  
+            <td style="color:${l.paid?'var(--sector-green)':'var(--f1-red)'}">${parseInt(l.cost || 0).toLocaleString()}</td>  
+            <td><small>${l.staff}</small></td>  
+            <td>${isAdmin ? `<button onclick="deleteLog(${i})" style="background:none; color:var(--f1-red)">Del</button>` : '✔'}</td>  
+        </tr>`).join("");  
+}  
+
+function registerUser() {  
+    const u = document.getElementById('new-username').value;  
+    const p = document.getElementById('new-password').value;  
+    const r = document.getElementById('new-role').value;  
+    if(u && p){ users.push({user: u, pass: p, role: r}); saveAppState(); }  
+}  
+
+function renderUserList() {  
+    document.getElementById('user-list-body').innerHTML = users.map((u, i) => `  
+        <tr><td style="color:white">${u.user}</td><td style="color:#aaa">${u.role}</td><td style="text-align:right">  
+        ${u.user==='admin'?'':`<button onclick="users.splice(${i},1);saveAppState()" style="color:var(--f1-red); background:none">X</button>`}</td></tr>`).join("");  
+}  
+
+function savePrices() {  
+    const p20 = parseInt(document.getElementById('p-20').value);  
+    const p40 = parseInt(document.getElementById('p-40').value);  
+    const p60 = parseInt(document.getElementById('p-60').value);  
+    prices = { 20: p20, 40: p40, 60: p60 };  
+    saveAppState(); alert("CONFIRMED!");  
+}  
+
+function closeModal() {   
+    document.getElementById('modal-start').style.display = 'none';   
+}
+
+function closeQModal() { document.getElementById('modal-q-select').style.display = 'none'; }  
+function checkQueueReady() { const n = document.getElementById('q-name').value, d = document.getElementById('q-dur').value, p = document.getElementById('q-pay-init').value; document.getElementById('btn-add-queue').disabled = !(n && d && p); }  
+function adjustTime(i, ms) { endTimes[i] += ms; saveAppState(); }  
+function pause(i) { isPaused[i] = !isPaused[i]; saveAppState(); }  
+function editUnitName(i) { const n = prompt("New Chassis Name:", unitNames[i]); if(n) { unitNames[i] = n; saveAppState(); } }  
+function addNewUnit() { const n = prompt("Chassis Name:"); if(n){ unitNames.push(n); saveAppState(); }}  
+function deleteUnit(i) { if(confirm("Retire this car?")){ unitNames.splice(i, 1); saveAppState(); }}  
+function clearAllLogs() { if(confirm("Purge telemetry data?")) { logs = []; saveAppState(); }}  
+function deleteLog(i) { logs.splice(i, 1); saveAppState(); }  
+function setReportFilter(t, b) { 
+    currentReportFilter = t; 
+    document.querySelectorAll('.filter-btn').forEach(x => {
+        x.classList.remove('active');
+        x.style.background = "#333";
+        x.style.color = "#aaa";
+    }); 
+    b.classList.add('active'); 
+    b.style.background = "var(--f1-red)";
+    b.style.color = "white";
+    renderLogs(); 
+}  
+function toggleQueuePaid(idx) { if(confirm("Update payment status?")) { queue[idx].paid = !queue[idx].paid; saveAppState(); } }  
+function confirmTogglePay(i) { if(confirm("Update payment status?")) { isPaid[i] = !isPaid[i]; saveAppState(); } }  
+function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({logs, prices, unitNames, users})); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "telemetry_backup.json"); dl.click(); }  
+
+setInterval(() => {   
+    const el = document.getElementById('live-clock');  
+    if(el) el.innerText = new Date().toLocaleTimeString('id-ID');   
+}, 1000);
+
+window.addEventListener('online', () => {
+    if (localStorage.getItem('pending_sync')) {
+        saveAppState();
+        localStorage.removeItem('pending_sync');
+    }
+});
+</script>
+
+<script>  
+function logout() {  
+    localStorage.removeItem('currentUser');  
+    location.reload();  
+}  
+    
+if ('serviceWorker' in navigator) {  
+    window.addEventListener('load', () => {  
+        navigator.serviceWorker.register('./sw.js')  
+            .then((reg) => console.log('SW Registered'))
+            .catch((err) => console.log('SW Fail', err));  
+    });  
+}
+  
+let deferredPrompt;  
+const installModal = document.getElementById('modal-install-pwa');  
+const installBtn = document.getElementById('btn-install-pwa');  
+
+window.addEventListener('beforeinstallprompt', (e) => {  
+    e.preventDefault();  
+    deferredPrompt = e;  
+    const hasRefused = localStorage.getItem('pwa_refused');  
+    if (!hasRefused) {  
+        installModal.style.display = 'flex';  
+    }  
+});  
+
+installBtn.addEventListener('click', async () => {  
+    if (deferredPrompt) {  
+        deferredPrompt.prompt();  
+        const { outcome } = await deferredPrompt.userChoice;  
+        deferredPrompt = null;  
+    }  
+    closeInstallModal();  
+});  
+
+function closeInstallModal() {  
+    installModal.style.display = 'none';  
+}  
+
+window.addEventListener('appinstalled', () => {  
+    installModal.style.display = 'none';  
+    deferredPrompt = null;  
+});  
+      
+function readUnitName(unitName) {  
+    const num = unitName.replace(/\D/g, '');  
+    if (!num) return unitName;  
+    const digitMap = ['nol','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan'];  
+    const spoken = num.split('').map(d => digitMap[d]).join(' ');  
+    return `unit ${spoken}`;  
+}  
+  
+function startVoiceLoop() {  
+    if (voiceInterval) return;  
+    speakExpiredUnits(); 
+    voiceInterval = setInterval(() => {  
+        speakExpiredUnits();  
+    }, 20000);  
+}  
+function stopVoiceLoop() {  
+    if (voiceInterval) {  
+        clearInterval(voiceInterval);  
+        voiceInterval = null;  
+    }  
+    expiredUnits.clear();  
+    speechSynthesis.cancel(); 
+}  
+  
+function speakExpiredUnits() {  
+    if (!('speechSynthesis' in window)) return;  
+    if (expiredUnits.size === 0) return;  
+  
+    const units = Array.from(expiredUnits).map(u => readUnitName(u));  
+    const unitText =  
+        units.length === 1  
+            ? units[0]  
+            : units.slice(0, -1).join(', ') + ' dan ' + units.slice(-1);  
+            
+    const unpaidUnits = Array.from(expiredUnits)  
+        .map(u => ({ raw: u, spoken: readUnitName(u) }))  
+        .filter(o => {  
+            const idx = unitNames.indexOf(o.raw);  
+            return idx !== -1 && !isPaid[idx];  
+        })  
+        .map(o => o.spoken);  
+  
+    speechSynthesis.cancel();  
+  
+    const normalMsg = new SpeechSynthesisUtterance(  
+        `Box box, ${unitText} masuk pit sekarang.`  
+    );  
+    normalMsg.lang = 'id-ID';  
+    normalMsg.rate = 1.0;  
+    
+    speechSynthesis.speak(normalMsg);  
+  
+    if (unpaidUnits.length > 0) {  
+        const unpaidText =  
+            unpaidUnits.length === 1  
+                ? unpaidUnits[0]  
+                : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);  
+  
+        const alertMsg = new SpeechSynthesisUtterance(  
+            `Peringatan, ${unpaidText} belum melunasi pembayaran.`  
+        );  
+        alertMsg.lang = 'id-ID';  
+        alertMsg.rate = 1.1;   
+        setTimeout(() => {  
+            speechSynthesis.speak(alertMsg);  
+        }, 1000);  
+    }  
+}  
+
+function handleConnectionChange() {
+    const banner = document.getElementById('offline-banner');
+    const userDisplay = document.getElementById('current-user-display');
+    
+    if (navigator.onLine) {
+        banner.style.display = 'none';
+        if (userDisplay && currentUser) userDisplay.style.color = '#666';
+        if (localStorage.getItem('pending_sync')) { saveAppState(); }
+    } else {
+        banner.style.display = 'block';
+        if (userDisplay && currentUser) {
+            userDisplay.innerText = "OFFLINE: " + currentUser.user;  
+            userDisplay.style.color = 'var(--f1-red)';
+        }
+    }
+}
+
+window.addEventListener('online', handleConnectionChange);
+window.addEventListener('offline', handleConnectionChange);
+handleConnectionChange();
+
+</script>  
+</body>  
+</html>
