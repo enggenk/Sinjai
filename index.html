@@ -1020,7 +1020,7 @@ function speakExpiredUnits() {
     speechSynthesis.cancel();  
   
     const normalMsg = new SpeechSynthesisUtterance(  
-        `Box box, ${unitText} masuk pit sekarang.`  
+        `tor monitor ketua, ${unitText} habis mi ketua.`  
     );  
     normalMsg.lang = 'id-ID';  
     normalMsg.rate = 1.0;  
@@ -1034,7 +1034,7 @@ function speakExpiredUnits() {
                 : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);  
   
         const alertMsg = new SpeechSynthesisUtterance(  
-            `Peringatan, ${unpaidText} belum melunasi pembayaran.`  
+            `lapor ketua, ${unpaidText} belumpi na bayar.`  
         );  
         alertMsg.lang = 'id-ID';  
         alertMsg.rate = 1.1;   
